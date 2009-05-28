@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#ifndef _WIN32_IE
-#define _WIN32_IE 0x500
-#endif
 
 //#define INCLUDE_DEPRECATED_FEATURES 1
 

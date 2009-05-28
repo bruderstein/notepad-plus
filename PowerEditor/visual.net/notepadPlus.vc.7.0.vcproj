@@ -49,8 +49,9 @@
 				ExceptionHandling="0"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=""
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="precompiled_headers.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -143,7 +144,9 @@
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="precompiled_headers.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -233,7 +236,8 @@
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=""
+				PrecompiledHeaderThrough="precompiled_headers.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -327,7 +331,9 @@
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="precompiled_headers.h"
+				PrecompiledHeaderFile="$(IntDir)\$(TargetName).pch"
 				WarningLevel="4"
 				WarnAsError="true"
 				Detect64BitPortabilityProblems="false"
@@ -407,7 +413,31 @@
 				RelativePath="..\src\precompiled_headers.cpp"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Debug Unicode|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Unicode|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
