@@ -15,14 +15,10 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#include "precompiled_headers.h"
 #include "DocTabView.h"
 
-#ifndef _WIN32_IE
-#define _WIN32_IE	0x0600
-#endif //_WIN32_IE
 
-#include <commctrl.h>
-#include <shlwapi.h>
 
 bool DocTabView::_hideTabBarStatus = false;
 

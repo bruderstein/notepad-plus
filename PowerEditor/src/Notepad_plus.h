@@ -17,7 +17,6 @@
 
 #ifndef NOTEPAD_PLUS_H
 #define NOTEPAD_PLUS_H
-#include <window.h>
 #include "Window.h"
 #include "ScintillaEditView.h"
 #include "ToolBar.h"
@@ -36,7 +35,6 @@
 #include "GoToLineDlg.h"
 #include "columnEditor.h"
 #include "WordStyleDlg.h"
-//#include "constant.h"
 #include "trayIconControler.h"
 #include "ContextMenu.h"
 #include "PluginsManager.h"
@@ -835,6 +833,13 @@ private:
 		}
 		return false;
 	};
-};
+
+	void EnableMouseWheelZoom(bool enable)
+	{
+		_subEditView.execute(SCI_SETWHEELZOOMING, enable);
+		_mainEditView.execute(SCI_SETWHEELZOOMING, enable);
+		_invisibleEditView.execute(SCI_SETWHEELZOOMING, enable);
+		_fileEditView.execute(SCI_SETWHEELZOOMING, enable);
+	}};
 
 #endif //NOTEPAD_PLUS_H

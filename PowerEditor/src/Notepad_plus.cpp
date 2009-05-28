@@ -20,7 +20,8 @@
 
 //#define INCLUDE_DEPRECATED_FEATURES 1
 
-#include <shlwapi.h>
+#include "precompiled_headers.h"
+
 //#include "dbghelp.h"
 
 #include "Notepad_plus.h"
@@ -35,7 +36,6 @@
 #include "ShortcutMapper.h"
 #include "preferenceDlg.h"
 #include "TaskListDlg.h"
-#include <algorithm>
 #include "xmlMatchedTagsHighlighter.h"
 
 const TCHAR Notepad_plus::_className[32] = TEXT("Notepad++");
@@ -4487,6 +4487,13 @@ void Notepad_plus::command(int id)
 		}
 		break;
 
+		case IDM_SETTING_MENU_WHEEL:
+		{
+			NppGUI & nppGUI = (NppGUI &)pNppParam->getNppGUI();
+			EnableMouseWheelZoom(nppGUI._enableMouseWheelZoom);
+		}
+		break;
+
 		default :
 			if (id > IDM_FILEMENU_LASTONE && id < (IDM_FILEMENU_LASTONE + _lastRecentFileList.getMaxNbLRF() + 1))
 			{
@@ -7067,6 +7074,8 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			_zoomOriginalValue = _pEditView->execute(SCI_GETZOOM);
 			_mainEditView.execute(SCI_SETZOOM, svp1._zoom);
 			_subEditView.execute(SCI_SETZOOM, svp2._zoom);
+
+			EnableMouseWheelZoom(nppGUI._enableMouseWheelZoom);
 
 			TabBarPlus::doDragNDrop(true);
 
