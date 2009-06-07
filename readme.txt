@@ -8,3 +8,4 @@ On top of that:
 - Cleaned the PowerEditor source so it compiles with /W4 /WX
 - Introduced precompiled headers
 - Fixed the hotspot coloring bug
+- Removed the VC7 project files.
