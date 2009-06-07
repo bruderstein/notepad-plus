@@ -143,6 +143,11 @@ public:
 		
 		for (BufferStyleMap::iterator it(_hotspotStyles.begin()); it != _hotspotStyles.end(); ++it ) 
 		{
+			for (StyleMap::iterator it2(it->second->begin()) ; it2 != it->second->end() ; ++it2)
+			{
+				if (it2->second._fontName != NULL)
+					delete [] it2->second._fontName;
+			}
 			delete it->second;
 		}
 
@@ -577,25 +582,18 @@ protected:
 
 	SCINTILLA_FUNC _pScintillaFunc;
 	SCINTILLA_PTR  _pScintillaPtr;
-
 	static WNDPROC _scintillaDefaultProc;
 	CallWindowProcFunc _callWindowProc;
-
 	BufferID attachDefaultDoc();
 
 	//Store the current buffer so it can be retrieved later
 	BufferID _currentBufferID;
 	Buffer * _currentBuffer;
-
 	folderStyle _folderStyle;
-
     NppParameters *_pParameter;
-
 	int _codepage;
 	int _oemCodepage;
-
 	bool _lineNumbersShown;
-
 	bool _wrapRestoreNeeded;
 
 	typedef std::map<int, Style> StyleMap;
@@ -618,7 +616,7 @@ protected:
 	void updateHotspotMaps();
 	bool IsHotspotStyleID(int styleID) const;
 	bool getHotSpotFromStyle(Style& out_hotspot, int idStyleFrom) const;
-	void createHotSpotFromStyle(Style& out_hotspot, int idStyleFrom) const;
+	void createHotSpotFromStyle(Style& out_hotspot, int idStyleFrom, int nativeLangEncoding = -1) const;
 	void setHotspotStyle(Style& styleToSet, int originalStyleId);
 	void setStyle(Style styleToSet);			//NOT by reference	(style edited)
 	void setSpecialStyle(const Style& styleToSet);	//by reference
