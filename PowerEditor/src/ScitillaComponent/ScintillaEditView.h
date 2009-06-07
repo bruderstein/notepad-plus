@@ -106,27 +106,7 @@ const int MARK_HIDELINESEND = 22;
 // 15 - 0  are free to use for plugins
 
 
-static int getNbChiffre(int aNum, int base)
-{
-	int nbChiffre = 1;
-	int diviseur = base;
-	
-	for (;;)
-	{
-		int result = aNum / diviseur;
-		if (!result)
-			break;
-		else
-		{
-			diviseur *= base;
-			nbChiffre++;
-		}
-	}
-	if ((base == 16) && (nbChiffre % 2 != 0))
-		nbChiffre += 1;
-
-	return nbChiffre;
-};
+int getNbDigits(int aNum, int base);
 
 TCHAR * int2str(TCHAR *str, int strLen, int number, int base, int nbChiffre, bool isZeroLeading);
 
@@ -159,6 +139,21 @@ public:
 		if ((!_refCount)&&(_hLib))
 		{
 			::FreeLibrary(_hLib);
+		}
+		
+		for (BufferStyleMap::iterator it(_hotspotStyles.begin()); it != _hotspotStyles.end(); ++it ) 
+		{
+			for (StyleMap::iterator it2(it->second->begin()) ; it2 != it->second->end() ; ++it2)
+			{
+				if (it2->second._fontName != NULL)
+					delete [] it2->second._fontName;
+			}
+			delete it->second;
+		}
+
+		for (BufferHotspotOriginMap::iterator it(_hotspotOrigins.begin()); it != _hotspotOrigins.end(); ++it ) 
+		{
+			delete it->second;
 		}
 	};
 	virtual void destroy()
@@ -587,26 +582,29 @@ protected:
 
 	SCINTILLA_FUNC _pScintillaFunc;
 	SCINTILLA_PTR  _pScintillaPtr;
-
 	static WNDPROC _scintillaDefaultProc;
 	CallWindowProcFunc _callWindowProc;
-
 	BufferID attachDefaultDoc();
 
 	//Store the current buffer so it can be retrieved later
 	BufferID _currentBufferID;
 	Buffer * _currentBuffer;
-
 	folderStyle _folderStyle;
-
     NppParameters *_pParameter;
-
 	int _codepage;
 	int _oemCodepage;
-
 	bool _lineNumbersShown;
-
 	bool _wrapRestoreNeeded;
+
+	typedef std::map<int, Style> StyleMap;
+	typedef std::map<BufferID, StyleMap*> BufferStyleMap;
+	BufferStyleMap _hotspotStyles;
+	StyleMap* _currentHotspotStyleMap;
+
+	typedef std::map<int, int> HotspotOriginMap;
+	typedef std::map<BufferID, HotspotOriginMap*> BufferHotspotOriginMap;
+	BufferHotspotOriginMap _hotspotOrigins;
+	HotspotOriginMap* _currentHotspotOriginMap;
 
 //Lexers and Styling
 	void defineDocType(LangType typeDoc);	//setup stylers for active document
@@ -615,9 +613,14 @@ protected:
 	void setKeywords(LangType langType, const char *keywords, int index);
 	void setLexer(int lexerID, LangType langType, int whichList);
 	inline void makeStyle(LangType langType, const TCHAR **keywordArray = NULL);
+	void updateHotspotMaps();
+	bool IsHotspotStyleID(int styleID) const;
+	bool getHotSpotFromStyle(Style& out_hotspot, int idStyleFrom) const;
+	void createHotSpotFromStyle(Style& out_hotspot, int idStyleFrom, int nativeLangEncoding = -1) const;
+	void setHotspotStyle(Style& styleToSet, int originalStyleId);
 	void setStyle(Style styleToSet);			//NOT by reference	(style edited)
-	void setSpecialStyle(Style & styleToSet);	//by reference
-	void setSpecialIndicator(Style & styleToSet) {
+	void setSpecialStyle(const Style& styleToSet);	//by reference
+	void setSpecialIndicator(const Style& styleToSet) {
 		execute(SCI_INDICSETFORE, styleToSet._styleID, styleToSet._bgColor);
 	};
 
@@ -823,6 +826,10 @@ protected:
 	};
 
 	bool expandWordSelection();
+
+private:
+
+	void reapplyHotspotStyles();
 };
 
 #endif //SCINTILLA_EDIT_VIEW_H

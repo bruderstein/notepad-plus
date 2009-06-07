@@ -12,7 +12,7 @@
 //////////////////
 // Construct from args
 //
-WINRECT::WINRECT(WORD f, UINT id, LONG p)
+WINRECT::WINRECT(WORD f, INT id, LONG p)
 {
 	memset(this, 0, sizeof(WINRECT));
 	flags = f;

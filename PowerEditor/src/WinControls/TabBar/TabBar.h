@@ -130,7 +130,7 @@ public:
 
 
 protected:
-	size_t _nbItem;
+	int  _nbItem;
 	bool _hasImgLst;
 	HFONT _hFont;
 	HFONT _hLargeFont;
@@ -210,6 +210,11 @@ public :
 
 	POINT getDraggingPoint() const {
 		return _draggingPoint;
+	};
+
+	void resetDraggingPoint() {
+		_draggingPoint.x = 0;
+		_draggingPoint.y = 0;
 	};
 
 	static void doOwnerDrawTab() {

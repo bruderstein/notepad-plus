@@ -595,7 +595,7 @@ void WindowsDlg::doSave()
 	nmdlg.code = WDN_NOTIFY;
 	nmdlg.nItems = ListView_GetSelectedCount(_hList);
 	nmdlg.Items = new UINT[nmdlg.nItems];
-	for (UINT i=-1, j=0;;++j) {
+	for (INT i=-1, j=0;;++j) {
 		i = ListView_GetNextItem(_hList, i, LVNI_SELECTED); 
 		if (i == -1) break;						
 		nmdlg.Items[j] = _idxMap[i];
@@ -648,7 +648,7 @@ void WindowsDlg::doClose()
 	nmdlg.Items = new UINT[nmdlg.nItems];
 	vector<int> key;
 	key.resize(n, 0x7fffffff);
-	for(UINT i=-1, j=0;; ++j) {
+	for(INT i=-1, j=0;; ++j) {
 		i = ListView_GetNextItem(_hList, i, LVNI_SELECTED); 
 		if (i == -1) break;
 		ListView_SetItemState(_hList, i, 0, LVIS_SELECTED); // deselect
@@ -675,12 +675,12 @@ void WindowsDlg::doClose()
 	}
 	delete[] nmdlg.Items;
 
-	if (_pTab->nbItem() != _idxMap.size())
+	if (_pTab->nbItem() != (int)_idxMap.size())
 		doRefresh(true);
 	else
 	{
 		// select first previously selected item (or last one if only the last one was removed)
-		if (index == _idxMap.size()) index --;
+		if (index == (int)_idxMap.size()) index --;
 		if (index >= 0)
 		{
 			ListView_SetItemState(_hList, index, LVIS_SELECTED, LVIS_SELECTED);
@@ -707,7 +707,7 @@ void WindowsDlg::doSortToTabs()
 	nmdlg.Items = new UINT[nmdlg.nItems];
 	vector<int> key;
 	key.resize(n, 0x7fffffff);
-	for(UINT i=-1, j=0;; ++j) {
+	for(INT i=-1, j=0;; ++j) {
 		i = ListView_GetNextItem(_hList, i, LVNI_ALL); 
 		if (i == -1) break;
 		nmdlg.Items[j] = _idxMap[i];

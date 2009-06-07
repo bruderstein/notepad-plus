@@ -184,7 +184,7 @@ void Process::listenerStdOut()
 
 	::ResumeThread(_hProcessThread);
 
-	while (true)
+	for(;;)
 	{ // got data
 		memset(bufferOut,0x00,MAX_LINE_LENGTH + 1); 
 		//memset(bufferErr,0x00,MAX_LINE_LENGTH + 1);
@@ -244,7 +244,7 @@ void Process::listenerStdErr()
 
 	::ResumeThread(_hProcessThread);
 
-	while (true)
+	for(;;)
 	{ // got data
 		memset(bufferErr, 0x00, MAX_LINE_LENGTH + 1);
 		taille = sizeof(bufferErr) - sizeof(TCHAR);

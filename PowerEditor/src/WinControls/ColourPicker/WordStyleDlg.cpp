@@ -19,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "precompiled_headers.h"
 #include "WordStyleDlg.h"
-#include "ScintillaEditView.h"
 
 BOOL CALLBACK ColourStaticTextHooker::colourStaticProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -362,6 +361,7 @@ BOOL CALLBACK WordStyleDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lPar
 					}
 
 					default:
+					{
 						switch (HIWORD(wParam))
 						{
 							case CBN_SELCHANGE : // == case LBN_SELCHANGE :
@@ -444,15 +444,13 @@ BOOL CALLBACK WordStyleDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lPar
 								return FALSE;
 							}
 						}
-						return TRUE;
+					}
 				}
 			}
-
 		}
 		default :
 			return FALSE;
 	}
-	return FALSE;
 }
 
 void WordStyleDlg::loadLangListFromNppParam()
@@ -813,12 +811,9 @@ void WordStyleDlg::apply()
 {
 	LexerStylerArray & lsa = (NppParameters::getInstance())->getLStylerArray();
 	StyleArray & globalStyles = (NppParameters::getInstance())->getGlobalStylers();
-
 	lsa = _lsArray;
-	globalStyles = _globalStyles;
-
+	globalStyles = _globalStyles; 
+	
 	::EnableWindow(::GetDlgItem(_hSelf, IDOK), FALSE);
-	//_isDirty = false;
-	//_isSync = false;
 	::SendMessage(_hParent, WM_UPDATESCINTILLAS, 0, 0);
 }

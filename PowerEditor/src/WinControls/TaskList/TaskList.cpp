@@ -241,6 +241,5 @@ LRESULT TaskList::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		default :
 			return ::CallWindowProc(_defaultProc, hwnd, Message, wParam, lParam);
 	}
-	return FALSE;
 }
 

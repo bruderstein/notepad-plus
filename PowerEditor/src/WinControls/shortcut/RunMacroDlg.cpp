@@ -23,7 +23,7 @@
 #include "Notepad_plus_msgs.h"
 
 
-BOOL CALLBACK RunMacroDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK RunMacroDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM /*lParam*/)
 {	
 	switch (message) 
 	{
