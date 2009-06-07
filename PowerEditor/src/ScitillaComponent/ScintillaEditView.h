@@ -18,8 +18,6 @@
 #ifndef SCINTILLA_EDIT_VIEW_H
 #define SCINTILLA_EDIT_VIEW_H
 
-#include <vector>
-#include "Window.h"
 #include "Scintilla.h"
 #include "ScintillaRef.h"
 #include "SciLexer.h"
@@ -301,6 +299,14 @@ public:
 
 	bool isShownIndentGuide() const {
 		return (execute(SCI_GETINDENTATIONGUIDES) != 0);
+	};
+
+	bool isMouseWheelZoomEnable() const {
+		return (execute(SCI_GETWHEELZOOMING) != 0);
+	};
+
+	bool enableMouseWheelZoom(bool enable) {
+		execute(SCI_SETWHEELZOOMING, WPARAM(enable));
 	};
 
     void wrap(bool willBeWrapped = true) {
