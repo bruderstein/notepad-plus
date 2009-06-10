@@ -658,6 +658,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 				wheelDelta = - (-wheelDelta % WHEEL_DELTA);
 
 			if (wParam & MK_CONTROL) {
+				// NPPSTART Joce 06/10/09 DisableMouseWheelZoom
 				if (enableWheelZooming)
 				{
 					// Zoom! We play with the font sizes in the styles.
@@ -668,6 +669,7 @@ sptr_t ScintillaWin::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 						KeyCommand(SCI_ZOOMOUT);
 					}
 				}
+				// NPPEND
 			} else {
 				// Scroll
 				ScrollTo(topLine + linesToScroll);
