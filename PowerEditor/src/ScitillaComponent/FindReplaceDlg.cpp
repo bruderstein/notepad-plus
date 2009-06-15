@@ -766,6 +766,7 @@ BOOL CALLBACK FindReplaceDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lP
 				{
 					if (_currentStatus == FIND_DLG)
 					{
+                        combo2ExtendedMode(IDFINDWHAT);
 						updateCombo(IDFINDWHAT);
 
 						nppParamInst->_isFindReplacing = true;
@@ -777,6 +778,7 @@ BOOL CALLBACK FindReplaceDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lP
 
 				case IDC_FINDALL_CURRENTFILE :
 				{
+                    combo2ExtendedMode(IDFINDWHAT);
 					updateCombo(IDFINDWHAT);
 
 					nppParamInst->_isFindReplacing = true;
@@ -801,6 +803,7 @@ BOOL CALLBACK FindReplaceDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lP
 					if ((lstrlen(directory) > 0) && (directory[lstrlen(directory)-1] != '\\'))
 						_directory += TEXT("\\");
 
+                    combo2ExtendedMode(IDFINDWHAT);
 					updateCombo(IDFINDWHAT);
 
 					nppParamInst->_isFindReplacing = true;
@@ -1747,6 +1750,55 @@ void FindReplaceDlg::enableFindInFilesControls(bool isEnable)
 void FindReplaceDlg::getPatterns(vector<generic_string> & patternVect)
 {
 	cutString(_filters.c_str(), patternVect);
+}
+
+void FindReplaceDlg::combo2ExtendedMode(int comboID)
+{
+	HWND hFindCombo = ::GetDlgItem(_hSelf, comboID);
+	if (!hFindCombo) return;
+	
+	generic_string str2transform = getTextFromCombo(hFindCombo);
+		
+    // Count the number of character '\n' and '\r'
+    size_t nbEOL = 0;
+    size_t str2transformLen = lstrlen(str2transform.c_str());
+    for (size_t i = 0 ; i < str2transformLen ; i++)
+    {
+        if (str2transform[i] == '\r' || str2transform[i] == '\n')
+            nbEOL++;
+    }
+
+    if (nbEOL)
+    {
+		TCHAR * newBuffer = new TCHAR[str2transformLen + nbEOL*2 + 1];
+        int j = 0;
+        for (size_t i = 0 ; i < str2transformLen ; i++)
+        {
+            if (str2transform[i] == '\r')
+            {
+                newBuffer[j++] = '\\';
+                newBuffer[j++] = 'r';
+            }
+            else if (str2transform[i] == '\n')
+            {
+                newBuffer[j++] = '\\';
+                newBuffer[j++] = 'n';
+            }
+            else
+            {
+                newBuffer[j++] = str2transform[i];
+            }
+        }
+        newBuffer[j++] = '\0';
+		setSearchText(newBuffer);
+
+        _options._searchType = FindExtended;
+		::SendDlgItemMessage(_hSelf, IDNORMAL, BM_SETCHECK, FALSE, 0);
+		::SendDlgItemMessage(_hSelf, IDEXTENDED, BM_SETCHECK, TRUE, 0);
+		::SendDlgItemMessage(_hSelf, IDREGEXP, BM_SETCHECK, FALSE, 0);
+
+		delete [] newBuffer;
+    }
 }
 
 void Finder::setFinderStyle()
