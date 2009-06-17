@@ -2753,7 +2753,7 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 		//Else forward notification to window of rebarband
 		REBARBANDINFO rbBand;
 		winVer winVersion = (NppParameters::getInstance())->getWinVersion();
-		if (winVersion <= WV_ME)
+		if (winVersion <= WV_W2K)
 		{
 			ZeroMemory(&rbBand, sizeof(REBARBANDINFO));
 			rbBand.cbSize  = sizeof(REBARBANDINFO);
