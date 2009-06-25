@@ -69,6 +69,12 @@ static void ColouriseSearchResultLine(SearchResultMarkings* pMarkings, char *lin
 		
 		PLATFORM_ASSERT(lengthLine >= firstTokenLen + 2);
 
+		// NPPSTART Joce 06/25/09 Cleanup
+		#ifdef NDEBUG
+		lengthLine = lengthLine;
+		#endif
+		// NPPEND
+
 		styler.ColourTo(startLine + firstTokenLen, SCE_SEARCHRESULT_DEFAULT);
 
 		for (currentPos = firstTokenLen; lineBuffer[currentPos] != ':' ; currentPos++) PLATFORM_ASSERT(currentPos < lengthLine);
