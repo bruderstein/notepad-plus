@@ -56,10 +56,12 @@ static int cmpString(const void *a1, const void *a2) {
 	return strcmp(*(char**)(a1), *(char**)(a2));
 }
 
-static int cmpStringNoCase(const void *a1, const void *a2) {
-	// Can't work out the correct incantation to use modern casts here
-	return CompareCaseInsensitive(*(char**)(a1), *(char**)(a2));
-}
+
+// NPPSTART Joce 06/25/09 Cleanup
+//static int cmpStringNoCase(const void *a1, const void *a2) {
+//	// Can't work out the correct incantation to use modern casts here
+//	return CompareCaseInsensitive(*(char**)(a1), *(char**)(a2));
+//}
 
 
 static bool isInList(WordList & list, const char *s, bool specialMode, bool ignoreCase) 
