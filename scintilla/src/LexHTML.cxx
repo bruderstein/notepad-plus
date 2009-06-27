@@ -554,7 +554,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 	WordList &keywords6 = *keywordlists[5]; // SGML (DTD) keywords
 
 	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
-	styler.StartAt(startPos, static_cast<char>(STYLE_MAX));
+	// NPPSTART Joce 06/16/09 Scintilla_clean_precomp
+	styler.StartAt(startPos, STYLE_MAX);
+	// NPPEND
 	char prevWord[200];
 	prevWord[0] = '\0';
 	char phpStringDelimiter[200]; // PHP is not limited in length, we are
@@ -580,7 +582,9 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		if (startPos == 0)
 			state = SCE_H_DEFAULT;
 	}
-	styler.StartAt(startPos, static_cast<char>(STYLE_MAX));
+	// NPPSTART Joce 06/16/09 Scintilla_clean_precomp
+	styler.StartAt(startPos, STYLE_MAX);
+	// NPPEND
 
 	int lineCurrent = styler.GetLine(startPos);
 	int lineState;
@@ -2109,7 +2113,9 @@ static void ColouriseASPPiece(StyleContext &sc, WordList *keywordlists[]) {
 static void ColouriseASPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
-	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(STYLE_MAX));
+	// NPPSTART Joce 06/16/09 Scintilla_clean_precomp
+	StyleContext sc(startPos, length, initStyle, styler, STYLE_MAX);
+	// NPPEND
 	for (; sc.More(); sc.Forward()) {
 		ColouriseASPPiece(sc, keywordlists);
 	}
@@ -2201,7 +2207,9 @@ static void ColourisePHPPiece(StyleContext &sc, WordList *keywordlists[]) {
 static void ColourisePHPDoc(unsigned int startPos, int length, int initStyle, WordList *keywordlists[],
                                   Accessor &styler) {
 	// Lexer for HTML requires more lexical states (8 bits worth) than most lexers
-	StyleContext sc(startPos, length, initStyle, styler, static_cast<char>(STYLE_MAX));
+	// NPPSTART Joce 06/16/09 Scintilla_clean_precomp
+	StyleContext sc(startPos, length, initStyle, styler, STYLE_MAX);
+	// NPPEND
 	for (; sc.More(); sc.Forward()) {
 		ColourisePHPPiece(sc, keywordlists);
 	}

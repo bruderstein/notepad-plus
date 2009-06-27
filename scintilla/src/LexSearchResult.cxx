@@ -68,8 +68,8 @@ static void ColouriseSearchResultLine(SearchResultMarkings* pMarkings, char *lin
 		unsigned int currentPos;
 		
 		PLATFORM_ASSERT(lengthLine >= firstTokenLen + 2);
-
-		// NPPSTART Joce 06/25/09 Cleanup
+		// NPPSTART Joce 06/16/09 Scintilla_clean_precomp
+		// Avoid compiler warning in release
 		#ifdef NDEBUG
 		lengthLine = lengthLine;
 		#endif
