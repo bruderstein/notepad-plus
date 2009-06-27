@@ -3333,7 +3333,8 @@ void Notepad_plus::command(int id)
 			const int strSize = FINDREPLACE_MAXLENGTH;
 			TCHAR str[strSize];
 
-			_pEditView->getGenericSelectedText(str, strSize);
+			_pEditView->getGenericSelectedText(str, strSize, false);
+			if (0!=str[0])         // the selected text is not empty, then use it
 			_incrementFindDlg.setSearchText(str, _pEditView->getCurrentBuffer()->getUnicodeMode() != uni8Bit);
 
 			_incrementFindDlg.display();
@@ -7055,6 +7056,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			_invisibleEditView.init(_hInst, hwnd);
 			_invisibleEditView.execute(SCI_SETUNDOCOLLECTION);
 			_invisibleEditView.execute(SCI_EMPTYUNDOBUFFER);
+			_invisibleEditView.wrap(false); // Make sure no slow down
 
 			// Configuration of 2 scintilla views
             _mainEditView.showMargin(ScintillaEditView::_SC_MARGE_LINENUMBER, svp1._lineNumberMarginShow);
