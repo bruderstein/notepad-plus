@@ -304,7 +304,6 @@ public :
 			return; // out of range
 		::SendDlgItemMessage(_hSelf, IDC_INCFINDSTATUS, WM_SETTEXT, 0, (LPARAM)findStatus[iStatus]);
 	}
-
 	void addToRebar(ReBar * rebar);
 private :
 	bool _isRTL;

@@ -9093,7 +9093,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			{
 				_lastRecentFileList->setLock(false);	//only lock when the session is remembered
 			}
-			
+
 			if (!allClosed) 
 			{
 				//User cancelled the shutdown
@@ -10211,6 +10211,8 @@ void Notepad_plus::notifyBufferChanged(Buffer * buffer, int mask)
 			int curPos = _pEditView->execute(SCI_GETCURRENTPOS);
 			::PostMessage(_pEditView->getHSelf(), WM_LBUTTONUP, 0, 0);
 			::PostMessage(_pEditView->getHSelf(), SCI_SETSEL, curPos, curPos);
+			if (::IsIconic(_hSelf))
+				::ShowWindow(_hSelf, SW_RESTORE);
 		}
 	}
 
@@ -10763,17 +10765,17 @@ int Notepad_plus::getLangFromMenuName(const TCHAR * langName)
 			return id;
 }
 
-generic_string Notepad_plus::getLangFromMenu(const Buffer * buf)
+std::generic_string Notepad_plus::getLangFromMenu(const Buffer * buf)
 {
 	int	id;
-	const TCHAR * userLangName;
+	std::generic_string userLangName;
 	TCHAR	menuLangName[32];
 
 	id = (NppParameters::getInstance())->langTypeToCommandID( buf->getLangType() );
 
 	if ( ( id != IDM_LANG_USER ) || !( buf->isUserDefineLangExt() ) )
 	{
-		( ::GetMenuString( _mainMenuHandle, id, menuLangName, sizeof( menuLangName ), MF_BYCOMMAND ) );
+		::GetMenuString( _mainMenuHandle, id, menuLangName, sizeof( menuLangName ), MF_BYCOMMAND );
 		userLangName = (TCHAR *)menuLangName;
 	}
 	else

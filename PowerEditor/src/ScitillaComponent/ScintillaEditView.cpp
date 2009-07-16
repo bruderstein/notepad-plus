@@ -3280,21 +3280,21 @@ bool ScintillaEditView::isNeededFolderMarge( LangType typeDoc ) const
 {
 	switch (typeDoc)
 	{
-	case L_NFO:
-	case L_BATCH:
-	case L_TXT:
-	case L_MAKEFILE:
-	case L_SQL:
-	case L_ASM:
+		case L_NFO:
+		case L_BATCH:
+		case L_TXT:
+		case L_MAKEFILE:
+		case L_SQL:
+		case L_ASM:
 		//case L_TEX:
-	case L_HASKELL:
-	case L_PROPS:
-	case L_SMALLTALK:
-	case L_KIX:
-	case L_ADA:
-		return false;
-	default:
-		return true;
+		case L_HASKELL:
+		case L_PROPS:
+		case L_SMALLTALK:
+		case L_KIX:
+		case L_ADA:
+			return false;
+		default:
+			return true;
 	}
 }
 
