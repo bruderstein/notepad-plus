@@ -2053,13 +2053,13 @@ BOOL CALLBACK FindIncrementDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 				return TRUE;
 
 				case IDC_INCFINDMATCHCASE:
-				{
-					FindOption fo;
-					fo._isWholeWord = false;
+					{
+						FindOption fo;
+						fo._isWholeWord = false;
 					fo._incrementalType = FirstIncremental;
-					fo._isMatchCase = (BST_CHECKED == ::SendDlgItemMessage(_hSelf, IDC_INCFINDMATCHCASE, BM_GETCHECK, 0, 0));
+						fo._isMatchCase = (BST_CHECKED == ::SendDlgItemMessage(_hSelf, IDC_INCFINDMATCHCASE, BM_GETCHECK, 0, 0));
 
-					generic_string str2Search = _pFRDlg->getTextFromCombo(::GetDlgItem(_hSelf, IDC_INCFINDTEXT), isUnicode);
+						generic_string str2Search = _pFRDlg->getTextFromCombo(::GetDlgItem(_hSelf, IDC_INCFINDTEXT), isUnicode);
 					bool isFound = _pFRDlg->processFindNext(str2Search.c_str(), &fo, &findStatus);
 					setFindStatus(findStatus);
 					if (!isFound)
