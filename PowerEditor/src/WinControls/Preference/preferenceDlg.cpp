@@ -30,6 +30,7 @@
 #include "menuCmdID.h"
 #include "resource.h"
 #include "Parameters.h"
+#include "npp_winver.h"
 
 const int BLINKRATE_FASTEST = 50;
 const int BLINKRATE_SLOWEST = 2500;
@@ -845,7 +846,7 @@ BOOL CALLBACK SettingsDlg::run_dlgProc(UINT Message, WPARAM wParam, LPARAM /*lPa
 			::SendDlgItemMessage(_hSelf, IDC_CHECK_ENABLEWHEELZOOM, BM_SETCHECK, nppGUI._enableMouseWheelZoom, 0);
 			::SendDlgItemMessage(_hSelf, IDC_CHECK_AUTOUPDATE, BM_SETCHECK, !nppGUI._neverUpdate, 0);
 
-			bool isVistaAndAfter = (pNppParam->getWinVersion() >= WV_VISTA);
+			bool isVistaAndAfter = (getWinVersion() >= WV_VISTA);
 			if (isVistaAndAfter)
 			{
 				::SendDlgItemMessage(_hSelf, IDC_CHECK_AUTOUPDATE, BM_SETCHECK, FALSE, 0);
