@@ -120,29 +120,25 @@ LanguageName ScintillaEditView::langNames[L_EXTERNAL+1] = {
 
 int getNbDigits(int aNum, int base)
 {
-	int nbChiffre = 1;
-	int diviseur = base;
+	int bnDigits = 1;
+	int divider = base;
 
 	for (;;)
 	{
-		int result = aNum / diviseur;
+		int result = aNum / divider;
 		if (!result)
 			break;
 		else
 		{
-			diviseur *= base;
-			nbChiffre++;
+			divider *= base;
+			bnDigits++;
 		}
 	}
-	if ((base == 16) && (nbChiffre % 2 != 0))
-		nbChiffre += 1;
+	if ((base == 16) && (bnDigits % 2 != 0))
+		bnDigits += 1;
 
-	return nbChiffre;
+	return bnDigits;
 };
-
-//const int MASK_RED   = 0xFF0000;
-//const int MASK_GREEN = 0x00FF00;
-//const int MASK_BLUE  = 0x0000FF;
 
 void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 {
