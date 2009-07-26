@@ -18,7 +18,9 @@
 #ifndef DOCKINGMANAGER_H
 #define DOCKINGMANAGER_H
 
+#ifndef WINDOW_CONTROL_H
 #include "Window.h"
+#endif
 
 #define DSPC_CLASS_NAME TEXT("dockingManager")
 
@@ -71,8 +73,6 @@ public :
 
 	/* setting styles of docking */
 	void setStyleCaption(BOOL captionOnTop);
-
-	void setTabStyle(BOOL orangeLine);
 
 	int getDockedContSize(int iCont);
 	void setDockedContSize(int iCont, int iSize);

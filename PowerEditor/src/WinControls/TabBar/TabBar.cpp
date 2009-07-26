@@ -19,16 +19,18 @@
 #include "TabBar.h"
 #include "menuCmdID.h"
 #include "resource.h"
-
-const COLORREF blue      	            = RGB(0,       0, 0xFF);
-const COLORREF black     	            = RGB(0,       0,    0);
-const COLORREF white     	            = RGB(0xFF, 0xFF, 0xFF);
-const COLORREF grey      	            = RGB(128,   128,  128);
+#include "colors.h"
 
 #define	IDC_DRAG_TAB     1404
 #define	IDC_DRAG_INTERDIT_TAB 1405
 #define	IDC_DRAG_PLUS_TAB 1406
 #define	IDC_DRAG_OUT_TAB 1407
+
+const TCHAR TABBAR_ACTIVEFOCUSEDINDCATOR[64] = TEXT("Active tab focused indicator");
+const TCHAR TABBAR_ACTIVEUNFOCUSEDINDCATOR[64] = TEXT("Active tab unfocused indicator");
+const TCHAR TABBAR_ACTIVETEXT[64] = TEXT("Active tab text");
+const TCHAR TABBAR_INACTIVETEXT[64] = TEXT("Inactive tabs");
+
 
 bool TabBarPlus::_doDragNDrop = false;
 
@@ -984,25 +986,45 @@ void TabBarPlus::setColour(COLORREF colour2Set, tabColourIndex i)
 {
 	switch (i)
 	{
-	case activeText:
-		_activeTextColour = colour2Set;
-		break;
-	case activeFocusedTop:
-		_activeTopBarFocusedColour = colour2Set;
-		break;
-	case activeUnfocusedTop:
-		_activeTopBarUnfocusedColour = colour2Set;
-		break;
-	case inactiveText:
-		_inactiveTextColour = colour2Set;
-		break;
-	case inactiveBg :
-		_inactiveBgColour = colour2Set;
-		break;
-	default :
-		return;
+		case activeText:
+			_activeTextColour = colour2Set;
+			break;
+		case activeFocusedTop:
+			_activeTopBarFocusedColour = colour2Set;
+			break;
+		case activeUnfocusedTop:
+			_activeTopBarUnfocusedColour = colour2Set;
+			break;
+		case inactiveText:
+			_inactiveTextColour = colour2Set;
+			break;
+		case inactiveBg:
+			_inactiveBgColour = colour2Set;
+			break;
+		default :
+			return;
 	}
 	doOwnerDrawTab();
+}
+
+COLORREF TabBarPlus::getColour(tabColourIndex i)
+{
+	switch (i)
+	{
+		case activeText:
+			return _activeTextColour;
+		case activeFocusedTop:
+			return _activeTopBarFocusedColour;
+		case activeUnfocusedTop:
+			return _activeTopBarUnfocusedColour;
+		case inactiveText:
+			return _inactiveTextColour;
+		case inactiveBg:
+			return _inactiveBgColour;
+		default :
+			assert(0);
+			return black;
+	}
 }
 
 int TabBarPlus::getTabIndexAt(int x, int y)
