@@ -110,6 +110,7 @@ int Searching::convertExtendedToString(const TCHAR * query, TCHAR * result, int 
 					}
 					//not enough chars to make parameter, use default method as fallback
 					}
+					//lint -fallthrough
 				default: {	//unknown sequence, treat as regular text
 					result[j] = '\\';
 					j++;
@@ -701,6 +702,9 @@ bool Finder::notify(SCNotification *notification)
 				isDoubleClicked = false;
 			}
 			break;
+
+		default:
+		break;
 	}
 	return false;
 }
@@ -1331,6 +1335,9 @@ BOOL CALLBACK FindReplaceDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lP
 			}
 			break;
 		}
+
+		default:
+		break;
 	}
 	return FALSE;
 }
@@ -2510,23 +2517,26 @@ BOOL CALLBACK FindIncrementDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 							std::generic_string str2Search = _pFRDlg->getTextFromCombo(::GetDlgItem(_hSelf, IDC_INCFINDTEXT), isUnicode);
 							_pFRDlg->processFindNext(str2Search.c_str(), &fo, &findStatus);
 							setFindStatus(findStatus);
+							return TRUE;
 						}
-					return TRUE;
-					case EN_KILLFOCUS :
-					case EN_SETFOCUS :
-						break;
+
+						case EN_KILLFOCUS :
+						case EN_SETFOCUS :
+							break;
+
+						NO_DEFAULT_CASE;
 					}
 				}
 				return TRUE;
 
 				case IDC_INCFINDMATCHCASE:
-					{
-						FindOption fo;
-						fo._isWholeWord = false;
+				{
+					FindOption fo;
+					fo._isWholeWord = false;
 					fo._incrementalType = FirstIncremental;
-						fo._isMatchCase = (BST_CHECKED == ::SendDlgItemMessage(_hSelf, IDC_INCFINDMATCHCASE, BM_GETCHECK, 0, 0));
+					fo._isMatchCase = (BST_CHECKED == ::SendDlgItemMessage(_hSelf, IDC_INCFINDMATCHCASE, BM_GETCHECK, 0, 0));
 
-						std::generic_string str2Search = _pFRDlg->getTextFromCombo(::GetDlgItem(_hSelf, IDC_INCFINDTEXT), isUnicode);
+					std::generic_string str2Search = _pFRDlg->getTextFromCombo(::GetDlgItem(_hSelf, IDC_INCFINDTEXT), isUnicode);
 					bool isFound = _pFRDlg->processFindNext(str2Search.c_str(), &fo, &findStatus);
 					setFindStatus(findStatus);
 					if (!isFound)
@@ -2536,6 +2546,7 @@ BOOL CALLBACK FindIncrementDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 						(*(_pFRDlg->_ppEditView))->execute(SCI_SETSEL, (WPARAM)-1, range.cpMin);
 					}
 				}
+				return TRUE;
 
 				case IDC_INCFINDHILITEALL :
 				{
@@ -2552,8 +2563,10 @@ BOOL CALLBACK FindIncrementDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 				}
 				return TRUE;
 
+				NO_DEFAULT_CASE;
 			}
 		}
+		break;
 
 		case WM_ERASEBKGND:
 		{
@@ -2575,6 +2588,9 @@ BOOL CALLBACK FindIncrementDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 			return FALSE;
 			break;
 		}
+
+		default:
+		break;
 	}
 	return FALSE;
 }
