@@ -303,10 +303,8 @@ private:
 class PluginCmdShortcut : public CommandShortcut {
 //friend class NppParameters;
 public:
-	PluginCmdShortcut(Shortcut sc, int id, const TCHAR *moduleName, int internalID) :
-		CommandShortcut(sc, id), _id(id), _internalID(internalID) {
-		lstrcpy(_moduleName, moduleName);
-	};
+	PluginCmdShortcut(Shortcut sc, int id, const TCHAR *moduleName, int internalID) :\
+		CommandShortcut(sc, id), _id(id), _moduleName(moduleName), _internalID(internalID) {};
 	bool isValid() const {
 		if (!Shortcut::isValid())
 			return false;
@@ -314,13 +312,13 @@ public:
 			return false;
 		return true;
 	}
-	const TCHAR * getModuleName() const {return _moduleName;};
+	const TCHAR * getModuleName() const {return _moduleName.c_str();};
 	int getInternalID() const {return _internalID;};
 	long getID() const {return _id;};
 
 private :
-	long _id;
-	TCHAR _moduleName[nameLenMax];
+	unsigned long _id;
+	generic_string _moduleName;
 	int _internalID;
 };
 

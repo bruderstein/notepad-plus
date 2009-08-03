@@ -78,9 +78,9 @@ static TiXmlNodeA * searchDlgNode(TiXmlNodeA *node, const char *dlgTagName);
 struct iconLocator {
 	int listIndex;
 	int iconIndex;
-	std::generic_string iconLocation;
+	generic_string iconLocation;
 
-	iconLocator(int iList, int iIcon, const std::generic_string iconLoc) 
+	iconLocator(int iList, int iIcon, const generic_string iconLoc) 
 		: listIndex(iList), iconIndex(iIcon), iconLocation(iconLoc){};
 };
 
@@ -221,7 +221,7 @@ public:
 	static HWND gNppHWND;	//static handle to Notepad++ window, NULL if non-existant
 private:
 	static const TCHAR _className[32];
-	TCHAR _nppPath[MAX_PATH];
+	generic_string _nppPath;
     Window *_pMainWindow;
 	DockingManager _dockingManager;
 
@@ -494,7 +494,7 @@ private:
 	};
 
 	void setDisplayFormat(formatType f) {
-		std::generic_string str;
+		generic_string str;
 		switch (f)
 		{
 			case MAC_FORMAT :
