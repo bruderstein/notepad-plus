@@ -276,7 +276,7 @@ LRESULT ScintillaEditView::scintillaNew_Proc(HWND hwnd, UINT Message, WPARAM wPa
 					execute(SCI_BEGINUNDOACTION);
 
 					ColumnModeInfo colInfos = getColumnModeSelectInfo();
-					std::generic_string str(1, (TCHAR)wParam);
+					generic_string str(1, (TCHAR)wParam);
 					columnReplace(colInfos, str.c_str());
 
 					int selStart = execute(SCI_GETSELECTIONSTART)+1;

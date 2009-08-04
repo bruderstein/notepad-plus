@@ -104,19 +104,17 @@ struct FloatingWindowInfo {
 };
 
 struct PlugingDlgDockingInfo {
-	TCHAR _name[MAX_PATH];
+	generic_string _name;
 	int _internalID;
 
 	int _currContainer;
 	int _prevContainer;
 	bool _isVisible;
 
-	PlugingDlgDockingInfo(const TCHAR *pluginName, int id, int curr, int prev, bool isVis) : _internalID(id), _currContainer(curr), _prevContainer(prev), _isVisible(isVis){
-		lstrcpy(_name, pluginName);
-	};
+	PlugingDlgDockingInfo(const TCHAR *pluginName, int id, int curr, int prev, bool isVis) : _name(pluginName), _internalID(id), _currContainer(curr), _prevContainer(prev), _isVisible(isVis){};
 
 	friend inline const bool operator==(const PlugingDlgDockingInfo & a, const PlugingDlgDockingInfo & b) {
-		if ((lstrcmp(a._name, b._name) == 0) && (a._internalID == b._internalID))
+		if ((a._name == b._name) && (a._internalID == b._internalID))
 			return true;
 		else
 			return false;
@@ -285,7 +283,7 @@ struct NppGUI
 	PrintSettings _printSettings;
 	BackupFeature _backup;
 	bool _useDir;
-	TCHAR _backupDir[MAX_PATH];
+	generic_string _backupDir;
 	DockingManagerData _dockingData;
 	GlobalOverride _globalOverride;
 	enum AutocStatus{autoc_none, autoc_func, autoc_word};
@@ -347,8 +345,7 @@ struct ScintillaViewParams
 struct Lang
 {
 	LangType _langID;
-	// JOCE, we'll want to remove that and replace by std::string.
-	TCHAR _langName[LANG_NAME_LEN];
+	generic_string _langName;
 	const TCHAR *_defaultExtList;
 	const TCHAR *_langKeyWordList[NB_LIST];
 	const TCHAR *_pCommentLineSymbol;
@@ -362,7 +359,6 @@ struct Lang
 		_pCommentStart(NULL),
 		_pCommentEnd(NULL)
 	{
-		_langName[0] = '\0';
 		for (int i = 0 ; i < NB_LIST ; i++)
 		{
 			_langKeyWordList[i] = NULL;
@@ -376,9 +372,8 @@ struct Lang
 		_pCommentStart(NULL),
 		_pCommentEnd(NULL)
 	{
-		_langName[0] = '\0';
 		if (name)
-			lstrcpy(_langName, name);
+			_langName = name;
 		for (int i = 0 ; i < NB_LIST ; i++)
 		{
 			_langKeyWordList[i] = NULL;
@@ -414,7 +409,7 @@ struct Lang
 	}
 
 	LangType getLangID() const {return _langID;}
-	const TCHAR * getLangName() const {return _langName;}
+	const TCHAR * getLangName() const {return _langName.c_str();}
 };
 
 class UserLangContainer
@@ -649,7 +644,7 @@ public:
 	const TCHAR * getLangExtFromName(const TCHAR *langName) const {
 		for (int i = 0 ; i < _nbLang ; i++)
 		{
-			if (!lstrcmp(_langList[i]->_langName, langName))
+			if (_langList[i]->_langName == langName)
 				return _langList[i]->_defaultExtList;
 		}
 		return NULL;
@@ -844,7 +839,7 @@ public:
 	void setScintillaAccelerator(ScintillaAccelerator *pScintAccel) {_pScintAccelerator = pScintAccel;};
 	ScintillaAccelerator * getScintillaAccelerator() {return _pScintAccelerator;}; 
 
-	const TCHAR * getNppPath() const {return _nppPath;};
+	generic_string getNppPath() const {return _nppPath;};
 	const TCHAR * getAppDataNppDir() const {return _appdataNppDir;};
 	const TCHAR * getWorkingDir() const {return _currentDirectory;};
 	void setWorkingDir(const TCHAR * newPath);
@@ -969,7 +964,7 @@ private:
 	TCHAR _shortcutsPath[MAX_PATH];
 	TCHAR _contextMenuPath[MAX_PATH];
 	TCHAR _sessionPath[MAX_PATH];
-	TCHAR _nppPath[MAX_PATH];
+	generic_string _nppPath;
 	TCHAR _userPath[MAX_PATH];
 	TCHAR _stylerPath[MAX_PATH];
 	TCHAR _appdataNppDir[MAX_PATH]; // sentinel of the absence of "doLocalConf.xml" : (_appdataNppDir == TEXT(""))?"doLocalConf.xml present":"doLocalConf.xml absent"

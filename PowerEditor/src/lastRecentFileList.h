@@ -34,8 +34,8 @@ public :
 		return _userMax;
 	};
 	
-	std::generic_string & getItem(int id);	//use menu id
-	std::generic_string & getIndex(int index);	//use menu id
+	generic_string & getItem(int id);	//use menu id
+	generic_string & getIndex(int index);	//use menu id
 
 	void setUserMaxNbLRF(int size);
 

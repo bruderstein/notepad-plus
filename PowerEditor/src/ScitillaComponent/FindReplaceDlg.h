@@ -48,6 +48,14 @@ enum DIALOG_TYPE {FIND_DLG, REPLACE_DLG, FINDINFILES_DLG};
 
 enum InWhat{ALL_OPEN_DOCS, FILES_IN_DIR, CURRENT_DOC};
 
+struct FoundInfo {
+	FoundInfo(int start, int end, const TCHAR *fullPath)
+		: _start(start), _end(end), _fullPath(fullPath) {};
+	int _start;
+	int _end;
+	std::generic_string _fullPath;
+};
+
 struct TargetRange {
 	int targetStart;
 	int targetEnd;
