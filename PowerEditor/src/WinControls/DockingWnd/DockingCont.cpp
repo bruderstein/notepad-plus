@@ -251,11 +251,12 @@ std::vector<tTbData*> DockingCont::getDataOfVisTb()
 
 bool DockingCont::isTbVis(tTbData* data)
 {
+	bool bRet = false;
 	TCITEM				tcItem		= {0};
 	int					iItemCnt	= ::SendMessage(_hContTab, TCM_GETITEMCOUNT, 0, 0);
 
 	tcItem.mask	= TCIF_PARAM;
-
+	
 	for(int iItem = 0; iItem < iItemCnt; iItem++)
 	{
 		::SendMessage(_hContTab, TCM_GETITEM, iItem, (LPARAM)&tcItem);
