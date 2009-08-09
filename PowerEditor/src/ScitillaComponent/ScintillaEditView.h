@@ -825,6 +825,7 @@ protected:
 		}
 	};
 
+    void setTabSettings(Lang *lang);
 	bool expandWordSelection();
 
 private:

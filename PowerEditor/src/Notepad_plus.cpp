@@ -268,10 +268,6 @@ void Notepad_plus::init(HINSTANCE hInst, HWND parent, const TCHAR *cmdLine, CmdL
 	else
 		::MoveWindow(_hSelf, newUpperLeft.x, newUpperLeft.y, nppGUI._appPos.right, nppGUI._appPos.bottom, TRUE);
 	
-	TCHAR nppBinPath[MAX_PATH*4];
-	::GetModuleFileName(NULL, nppBinPath, MAX_PATH*4);
-	_nppPath = nppBinPath;
-
 	if (nppGUI._tabStatus & TAB_MULTILINE)
 		::SendMessage(_hSelf, WM_COMMAND, IDM_VIEW_DRAWTABBAR_MULTILINE, 0);
 
@@ -302,12 +298,12 @@ void Notepad_plus::init(HINSTANCE hInst, HWND parent, const TCHAR *cmdLine, CmdL
 	vector<generic_string> patterns;
 	patterns.push_back(TEXT("*.xml"));
 
-	generic_string nppDir(_nppPath);
-	::PathRemoveFileSpec((TCHAR *)nppDir.c_str()); // <- nppDir is modified via the string pointer
+	generic_string nppDir(pNppParams->getNppPath());
+	::PathRemoveFileSpec(nppDir);
 
 #ifdef UNICODE
 	LocalizationSwitcher & localizationSwitcher = pNppParams->getLocalizationSwitcher();
-	wstring localizationDir = nppDir.c_str(); // <- should use the pointer to avoid the constructor of copy
+	wstring localizationDir = nppDir.c_str();
 	
 	localizationDir += TEXT("\\localization\\");
 	getMatchedFileNames(localizationDir.c_str(), patterns, fileNames, false, false);
@@ -717,7 +713,7 @@ BufferID Notepad_plus::doOpen(const TCHAR *fileName, bool isReadOnly)
 	{
 		TCHAR str2display[MAX_PATH*2];
 		generic_string longFileDir(longFileName);
-		PathRemoveFileSpec((TCHAR *)longFileDir.c_str()); // <- Modify std::string via pointer
+		PathRemoveFileSpec(longFileDir);
 
 		if (PathFileExists(longFileDir.c_str()))
 		{
@@ -1143,8 +1139,8 @@ bool Notepad_plus::fileSave(BufferID id)
 
 					// std::string path should be a temp throwable variable 
 					generic_string path = fn;
-					::PathRemoveFileSpec((LPTSTR)path.c_str()); // <- here we modify its data w/o using its interface
-					fn_dateTime_bak = path.c_str(); // <- here it must be path.c_str() but not path. Because the constructor of copy processes differently string and char *
+					::PathRemoveFileSpec(path);
+					fn_dateTime_bak = path.c_str();
 					
 
 					fn_dateTime_bak += TEXT("\\");
@@ -2746,17 +2742,9 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 		}
 		//Else forward notification to window of rebarband
 		REBARBANDINFO rbBand;
-		winVer winVersion = (NppParameters::getInstance())->getWinVersion();
-		if (winVersion <= WV_W2K)
-		{
-			ZeroMemory(&rbBand, sizeof(REBARBANDINFO));
-			rbBand.cbSize  = sizeof(REBARBANDINFO);
-		}
-		else
-		{
-			ZeroMemory(&rbBand, REBARBANDINFO_V3_SIZE);
-			rbBand.cbSize  = REBARBANDINFO_V3_SIZE;
-		}
+		ZeroMemory(&rbBand, REBARBAND_SIZE);
+		rbBand.cbSize  = REBARBAND_SIZE;
+
 		rbBand.fMask = RBBIM_CHILD;
 		::SendMessage(notifRebar->getHSelf(), RB_GETBANDINFO, lpnm->uBand, (LPARAM)&rbBand);
 		::SendMessage(rbBand.hwndChild, WM_NOTIFY, 0, (LPARAM)lpnm);
@@ -3085,7 +3073,7 @@ void Notepad_plus::specialCmd(int id, int param)
 
 void Notepad_plus::command(int id) 
 {
-	NppParameters *pNppParam = NppParameters::getInstance();
+	//NppParameters *pNppParam = NppParameters::getInstance();
 	switch (id)
 	{
 		case IDM_FILE_NEW:
@@ -3280,7 +3268,7 @@ void Notepad_plus::command(int id)
 			else if (id == IDM_EDIT_CURRENTDIRTOCLIP)
 			{
 				generic_string dir(buf->getFullPathName());
-				PathRemoveFileSpec((TCHAR *)dir.c_str());
+				PathRemoveFileSpec(dir);
 				str2Cliboard(dir.c_str());
 			}
 			else if (id == IDM_EDIT_FILENAMETOCLIP)
@@ -4125,7 +4113,7 @@ void Notepad_plus::command(int id)
 
 		case IDM_SETTING_TAB_REPLCESPACE:
 		{
-			NppGUI & nppgui = (NppGUI &)(pNppParam->getNppGUI());
+			NppGUI & nppgui = (NppGUI &)((NppParameters::getInstance())->getNppGUI());
 			nppgui._tabReplacedBySpace = !nppgui._tabReplacedBySpace;
 			_pEditView->execute(SCI_SETUSETABS, !nppgui._tabReplacedBySpace);
 			//checkMenuItem(IDM_SETTING_TAB_REPLCESPACE, nppgui._tabReplacedBySpace);
@@ -4135,7 +4123,7 @@ void Notepad_plus::command(int id)
 		case IDM_SETTING_TAB_SIZE:
 		{
 			ValueDlg tabSizeDlg;
-			NppGUI & nppgui = (NppGUI &)(pNppParam->getNppGUI());
+			NppGUI & nppgui = (NppGUI &)((NppParameters::getInstance())->getNppGUI());
 			tabSizeDlg.init(_hInst, _preference.getHSelf(), nppgui._tabSize, TEXT("Tab Size : "));
 			POINT p;
 			::GetCursorPos(&p);
@@ -4284,8 +4272,8 @@ void Notepad_plus::command(int id)
 
 		case IDM_HELP :
 		{
-			generic_string tmp(_nppPath);
-			::PathRemoveFileSpec((TCHAR *)tmp.c_str());
+			generic_string tmp((NppParameters::getInstance())->getNppPath());
+			::PathRemoveFileSpec(tmp);
 			generic_string nppHelpPath = tmp.c_str();
 
 			nppHelpPath += TEXT("\\NppHelp.chm");
@@ -4337,7 +4325,7 @@ void Notepad_plus::command(int id)
 
 		case IDM_UPDATE_NPP :
 		{
-			generic_string updaterDir = _nppPath;
+			generic_string updaterDir = (NppParameters::getInstance())->getNppPath();
 			updaterDir += TEXT("\\updater\\");
 			generic_string updaterFullPath = updaterDir + TEXT("gup.exe");
 			generic_string param = TEXT("-verbose -v");
@@ -4495,8 +4483,7 @@ void Notepad_plus::command(int id)
 
 		case IDM_SETTING_MENU_WHEEL:
 		{
-			NppGUI & nppGUI = (NppGUI &)pNppParam->getNppGUI();
-			EnableMouseWheelZoom(nppGUI._enableMouseWheelZoom);
+			EnableMouseWheelZoom(NppParameters::getInstance()->getNppGUI()._enableMouseWheelZoom);
 		}
 		break;
 
@@ -4521,7 +4508,7 @@ void Notepad_plus::command(int id)
 			else if ((id >= ID_MACRO) && (id < ID_MACRO_LIMIT))
 			{
 				int i = id - ID_MACRO;
-				vector<MacroShortcut> & theMacros = pNppParam->getMacroList();
+				vector<MacroShortcut> & theMacros = (NppParameters::getInstance())->getMacroList();
 				Macro macro = theMacros[i].getMacro();
 				_pEditView->execute(SCI_BEGINUNDOACTION);
 
@@ -4534,7 +4521,7 @@ void Notepad_plus::command(int id)
 			else if ((id >= ID_USER_CMD) && (id < ID_USER_CMD_LIMIT))
 			{
 				int i = id - ID_USER_CMD;
-				vector<UserCommand> & theUserCommands = pNppParam->getUserCommandList();
+				vector<UserCommand> & theUserCommands = (NppParameters::getInstance())->getUserCommandList();
 				UserCommand ucmd = theUserCommands[i];
 
 				Command cmd(ucmd.getCmd());
@@ -7698,6 +7685,20 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 		}
 		break;
 
+		case NPPM_INTERNAL_DOCORDERCHANGED :
+		{
+			BufferID id = _pEditView->getCurrentBufferID();
+
+			// Notify plugins that current file is about to be closed
+			SCNotification scnN;
+			scnN.nmhdr.code = NPPN_DOCORDERCHANGED;
+			scnN.nmhdr.hwndFrom = (void *)lParam;
+			scnN.nmhdr.idFrom = (uptr_t)id;
+			_pluginsManager.notify(&scnN);
+			return TRUE;
+		}
+		break;
+
 		case WM_SIZE:
 		{
 			RECT rc;
@@ -8844,7 +8845,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			generic_string pluginsConfigDirPrefix = pNppParam->getAppDataNppDir();
 			
 			if (pluginsConfigDirPrefix == TEXT(""))
-				pluginsConfigDirPrefix = _nppPath;
+				pluginsConfigDirPrefix = pNppParam->getNppPath();
 
 			const TCHAR *secondPart = TEXT("plugins\\Config");
 			
@@ -9776,10 +9777,9 @@ void Notepad_plus::notifyBufferChanged(Buffer * buffer, int mask) {
 	{
 		checkDocState();
 		setTitle();
-		TCHAR dir[MAX_PATH];
-		lstrcpy(dir, buffer->getFullPathName());
+		generic_string dir(buffer->getFullPathName());
 		PathRemoveFileSpec(dir);
-		setWorkingDir(dir);
+		setWorkingDir(dir.c_str());
 	}
 
 	if (mask & (BufferChangeLanguage)) 
@@ -9830,10 +9830,9 @@ void Notepad_plus::notifyBufferActivated(BufferID bufid, int view) {
 	setUniModeText(buf->getUnicodeMode());
 	setDisplayFormat(buf->getFormat());
 	enableConvertMenuItems(buf->getFormat());
-	TCHAR dir[MAX_PATH];
-	lstrcpy(dir, buf->getFullPathName());
+	generic_string dir(buf->getFullPathName());
 	PathRemoveFileSpec(dir);
-	setWorkingDir(dir);
+	setWorkingDir(dir.c_str());
 	setTitle();
 	//Make sure the colors of the tab controls match
 	::InvalidateRect(_mainDocTab.getHSelf(), NULL, FALSE);
