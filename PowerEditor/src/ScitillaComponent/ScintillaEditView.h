@@ -39,6 +39,7 @@ class NppParameters;
 struct CharacterRange;
 class UserDefineDialog;
 struct Style;
+struct Lang;
 
 #ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL 0x020A
@@ -399,6 +400,7 @@ protected:
 
 	int codepage2CharSet() const;
 
+    void setTabSettings(Lang *lang);
 	bool expandWordSelection();
 
 private:
