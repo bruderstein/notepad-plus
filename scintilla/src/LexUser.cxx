@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "KeyWords.h"
 #include "Scintilla.h"
 #include "SciLexer.h"
+#include "CharClassify.h"
 
 #define KEYWORD_BOXHEADER 1
 #define KEYWORD_FOLDCONTRACTED 2

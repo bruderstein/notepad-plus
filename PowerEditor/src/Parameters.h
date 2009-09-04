@@ -800,9 +800,11 @@ struct Lang
 	};
 
     void setTabInfo(int tabInfo) {
-        if (tabInfo == -1 || tabInfo == 0) return;
-        _isTabReplacedBySpace = (tabInfo & MASK_ReplaceBySpc) != 0; 
-        _tabSize = tabInfo & MASK_TabSize;
+        if (tabInfo != -1 && tabInfo & MASK_TabSize)
+        {
+            _isTabReplacedBySpace = (tabInfo & MASK_ReplaceBySpc) != 0; 
+            _tabSize = tabInfo & MASK_TabSize;
+        }
     };
 
 	const TCHAR * getDefaultExtList() const {
@@ -822,7 +824,7 @@ struct Lang
 
     int getTabInfo() const {
         if (_tabSize == -1) return -1;
-        return _isTabReplacedBySpace?0x80:0x00 | _tabSize;
+        return (_isTabReplacedBySpace?0x80:0x00) | _tabSize;
     };
 };
 
@@ -1138,6 +1140,7 @@ public:
 	bool writeGUIParams();
 
 	void writeStyles(LexerStylerArray & lexersStylers, StyleArray & globalStylers);
+    bool insertTabInfo(const TCHAR *langName, int tabInfo);
 
     LexerStylerArray & getLStylerArray() {return _lexerStylerArray;};
     StyleArray & getGlobalStylers() {return _widgetStyleArray;};
@@ -1375,7 +1378,6 @@ private:
 		*_pXmlToolIconsDoc, *_pXmlShortcutDoc, *_pXmlContextMenuDoc, *_pXmlSessionDoc;
 	
 	TiXmlDocumentA *_pXmlNativeLangDocA;
-	//TiXmlDocumentA *_pXmlEnglishDocA;
 
 	vector<TiXmlDocument *> _pXmlExternalLexerDoc;
 

@@ -13,6 +13,8 @@
 //#include <stdio.h>
 // NPPEND
 
+#include <string>
+
 #include "Platform.h"
 
 #include "Accessor.h"
@@ -20,7 +22,6 @@
 #include "PropSet.h"
 #include "KeyWords.h"
 #include "SciLexer.h"
-#include "SString.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -78,7 +79,7 @@ static void ColouriseDelimiter(StyleContext& sc, bool& apostropheStartsAttribute
 
 static void ColouriseNumber(StyleContext& sc, bool& apostropheStartsAttribute) {
     apostropheStartsAttribute = true;
-    SString number;
+    std::string number;
     sc.SetState(SCE_SPICE_NUMBER);
     // Get all characters up to a delimiter or a separator, including points, but excluding
     // double points (ranges).
@@ -107,7 +108,7 @@ static void ColouriseWhiteSpace(StyleContext& sc, bool& ) {
 static void ColouriseWord(StyleContext& sc, WordList& keywords, WordList& keywords2, WordList& keywords3, bool& apostropheStartsAttribute) {
     apostropheStartsAttribute = true;
     sc.SetState(SCE_SPICE_IDENTIFIER);
-    SString word;
+    std::string word;
     while (!sc.atLineEnd && !IsSeparatorOrDelimiterCharacter(sc.ch)) {
         word += static_cast<char>(tolower(sc.ch));
         sc.Forward();

@@ -57,12 +57,10 @@ class MarginsDlg : public StaticDialog
 public :
 	MarginsDlg() {};
 	virtual void destroy() {
-		_tabSizeVal.destroy();
 		_verticalEdgeLineNbColVal.destroy();
 	};
 	
 private :
-	URLCtrl _tabSizeVal;
 	URLCtrl _verticalEdgeLineNbColVal;
 	BOOL CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam);
 	void changePanelTo(int index);
@@ -93,17 +91,33 @@ class LangMenuDlg : public StaticDialog
 {
 public :
 	LangMenuDlg() {};
+    virtual void destroy() {
+		_tabSizeVal.destroy();
+	};
+
 private :
+    URLCtrl _tabSizeVal;
+    LexerStylerArray _lsArray;
 	BOOL CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam);
 	vector<LangMenuItem> _langList;
+};
+
+struct strCouple {
+	generic_string _varDesc;
+	generic_string _var;
+	strCouple(TCHAR *varDesc, TCHAR *var): _varDesc(varDesc), _var(var){};
 };
 
 class PrintSettingsDlg : public StaticDialog
 {
 public :
-	PrintSettingsDlg() {};
+	PrintSettingsDlg():_focusedEditCtrl(0), _selStart(0), _selEnd(0){};
 private :
 	BOOL CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam);
+	vector<strCouple> varList;
+	int _focusedEditCtrl;
+	DWORD _selStart;
+	DWORD _selEnd;
 };
 
 class BackupDlg : public StaticDialog
@@ -116,25 +130,18 @@ private :
 	BOOL CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam);
 };
 
-struct strCouple {
-	generic_string _varDesc;
-	generic_string _var;
-	strCouple(TCHAR *varDesc, TCHAR *var): _varDesc(varDesc), _var(var){};
-};
 
+
+/*
 class PrintSettings2Dlg : public StaticDialog
 {
 public :
 	PrintSettings2Dlg():_focusedEditCtrl(0), _selStart(0), _selEnd(0){};
 private :
 	BOOL CALLBACK run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam);
-	vector<strCouple> varList;
-	int _focusedEditCtrl;
-	DWORD _selStart;
-	DWORD _selEnd;
 
-	//ColourStaticTextHooker _colourHooker;
 };
+*/
 
 class PreferenceDlg : public StaticDialog
 {
@@ -164,7 +171,7 @@ public :
 		_fileAssocDlg.destroy();
 		_langMenuDlg.destroy();
 		_printSettingsDlg.destroy();
-		_printSettings2Dlg.destroy();
+		//_printSettings2Dlg.destroy();
 		_defaultNewDocDlg.destroy();
 	};
 private :
@@ -177,7 +184,7 @@ private :
 	RegExtDlg _fileAssocDlg;
 	LangMenuDlg _langMenuDlg;
 	PrintSettingsDlg _printSettingsDlg;
-	PrintSettings2Dlg _printSettings2Dlg;
+	//PrintSettings2Dlg _printSettings2Dlg;
 	DefaultNewDocDlg _defaultNewDocDlg;
 	BackupDlg _backupDlg;
 };

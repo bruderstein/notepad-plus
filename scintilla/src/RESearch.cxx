@@ -200,6 +200,7 @@
 
 // NPPSTART Joce 06/09/09 Scintilla_precomp_headers
 #include "precompiled_headers.h"
+//#include <stdlib.h>
 // NPPEND
 
 #include "CharClassify.h"

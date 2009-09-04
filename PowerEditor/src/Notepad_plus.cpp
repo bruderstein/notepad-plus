@@ -1923,7 +1923,8 @@ void Notepad_plus::enableCommand(int cmdID, bool doEnable, int which) const
 
 void Notepad_plus::checkClipboard() 
 {
-	bool hasSelection = _pEditView->execute(SCI_GETSELECTIONSTART) != _pEditView->execute(SCI_GETSELECTIONEND);
+	
+	bool hasSelection = (_pEditView->execute(SCI_GETSELECTIONSTART) != _pEditView->execute(SCI_GETSELECTIONEND)) || (_pEditView->execute(SCI_GETSELECTIONS) > 0);
 	bool canPaste = (_pEditView->execute(SCI_CANPASTE) != 0);
 	enableCommand(IDM_EDIT_CUT, hasSelection, MENU | TOOLBAR); 
 	enableCommand(IDM_EDIT_COPY, hasSelection, MENU | TOOLBAR);
@@ -2471,25 +2472,25 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 		if (!_tabPopupMenu.isCreated())
 		{
 			vector<MenuItemUnit> itemUnitArray;
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_CLOSE, TEXT("Close me")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_CLOSEALL_BUT_CURRENT, TEXT("Close all but me")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_SAVE, TEXT("Save me")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_SAVEAS, TEXT("Save me As...")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_RENAME, TEXT("Rename me")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_DELETE, TEXT("Delete me")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_PRINT, TEXT("Print me")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_CLOSE, TEXT("Close")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_CLOSEALL_BUT_CURRENT, TEXT("Close All but This")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_SAVE, TEXT("Save")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_SAVEAS, TEXT("Save As...")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_RENAME, TEXT("Rename")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_DELETE, TEXT("Delete")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_FILE_PRINT, TEXT("Print")));
 			itemUnitArray.push_back(MenuItemUnit(0, NULL));
-			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_SETREADONLY, TEXT("Read only")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_CLEARREADONLY, TEXT("Clear read only flag")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_SETREADONLY, TEXT("Read-Only")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_CLEARREADONLY, TEXT("Clear Read-Only Flag")));
 			itemUnitArray.push_back(MenuItemUnit(0, NULL));
-			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_FULLPATHTOCLIP,	TEXT("Full file path to Clipboard")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_FILENAMETOCLIP,   TEXT("File name to Clipboard")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_CURRENTDIRTOCLIP, TEXT("Current dir path to Clipboard")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_FULLPATHTOCLIP,	TEXT("Full File Path to Clipboard")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_FILENAMETOCLIP,   TEXT("Filename to Clipboard")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_EDIT_CURRENTDIRTOCLIP, TEXT("Current Dir. Path to Clipboard")));
 			itemUnitArray.push_back(MenuItemUnit(0, NULL));
-			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_GOTO_ANOTHER_VIEW, TEXT("Move to other view")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_CLONE_TO_ANOTHER_VIEW, TEXT("Clone to other view")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_GOTO_NEW_INSTANCE, TEXT("Move to new instance")));
-			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_LOAD_IN_NEW_INSTANCE, TEXT("Open in new instance")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_GOTO_ANOTHER_VIEW, TEXT("Move to Other View")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_CLONE_TO_ANOTHER_VIEW, TEXT("Clone to Other View")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_GOTO_NEW_INSTANCE, TEXT("Move to New Instance")));
+			itemUnitArray.push_back(MenuItemUnit(IDM_VIEW_LOAD_IN_NEW_INSTANCE, TEXT("Open in New Instance")));
 
 			_tabPopupMenu.create(_hSelf, itemUnitArray);
 			changeLangTabContextMenu();
@@ -2546,11 +2547,8 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 	case SCN_CHARADDED:
 	{
 		charAdded(static_cast<TCHAR>(notification->ch));
-
 		AutoCompletion * autoC = isFromPrimary?&_autoCompleteMain:&_autoCompleteSub;
-
 		autoC->update(notification->ch);
-		
 		break;
 	}
 
@@ -4114,29 +4112,9 @@ void Notepad_plus::command(int id)
 		}
 
 		case IDM_SETTING_TAB_REPLCESPACE:
-		{
-			NppGUI & nppgui = (NppGUI &)((NppParameters::getInstance())->getNppGUI());
-			nppgui._tabReplacedBySpace = !nppgui._tabReplacedBySpace;
-			_pEditView->execute(SCI_SETUSETABS, !nppgui._tabReplacedBySpace);
-			//checkMenuItem(IDM_SETTING_TAB_REPLCESPACE, nppgui._tabReplacedBySpace);
-			break;
-		}
-
 		case IDM_SETTING_TAB_SIZE:
 		{
-			ValueDlg tabSizeDlg;
-			NppGUI & nppgui = (NppGUI &)((NppParameters::getInstance())->getNppGUI());
-			tabSizeDlg.init(_hInst, _preference.getHSelf(), nppgui._tabSize, TEXT("Tab Size : "));
-			POINT p;
-			::GetCursorPos(&p);
-			::ScreenToClient(_hParent, &p);
-			int size = tabSizeDlg.doDialog(p, _isRTL);
-			if (size != -1)
-			{
-				nppgui._tabSize = size;
-				_pEditView->execute(SCI_SETTABWIDTH, nppgui._tabSize);
-			}
-
+            _pEditView->setTabSettings(_pEditView->getCurrentBuffer()->getCurrentLang());
 			break;
 		}
 
@@ -6407,17 +6385,18 @@ void Notepad_plus::changePrefereceDlgLang()
 #endif
 	}
 
-	changeDlgLang(_preference._printSettingsDlg.getHSelf(), "Print1", title, TITLE_BUF_LEN);
+	changeDlgLang(_preference._printSettingsDlg.getHSelf(), "Print", title);
 	if (*title)
 	{
 #ifdef UNICODE
 		const wchar_t *nameW = wmc->char2wchar(title, _nativeLangEncoding);
-		_preference._ctrlTab.renameTab(TEXT("Print1"), nameW);
+		_preference._ctrlTab.renameTab(TEXT("Print"), nameW);
 #else
-		_preference._ctrlTab.renameTab("Print1", title);
+		_preference._ctrlTab.renameTab("Print", title);
 #endif
 	}
-	changeDlgLang(_preference._printSettings2Dlg.getHSelf(), "Print2", title, TITLE_BUF_LEN);
+/*
+	changeDlgLang(_preference._printSettings2Dlg.getHSelf(), "Print2", title);
 	if (*title)
 	{
 #ifdef UNICODE
@@ -6427,7 +6406,8 @@ void Notepad_plus::changePrefereceDlgLang()
 		_preference._ctrlTab.renameTab("Print2", title);
 #endif
 	}
-	changeDlgLang(_preference._settingsDlg.getHSelf(), "MISC", title, TITLE_BUF_LEN);
+*/
+	changeDlgLang(_preference._settingsDlg.getHSelf(), "MISC", title);
 	if (*title)
 	{
 #ifdef UNICODE
@@ -7148,6 +7128,14 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			_subEditView.execute(SCI_SETZOOM, svp2._zoom);
 
 			EnableMouseWheelZoom(nppGUI._enableMouseWheelZoom);
+
+			_mainEditView.execute(SCI_SETMULTIPLESELECTION, true);
+			_subEditView.execute(SCI_SETMULTIPLESELECTION, true);
+			_mainEditView.execute(SCI_SETADDITIONALSELECTIONTYPING, true);
+			_subEditView.execute(SCI_SETADDITIONALSELECTIONTYPING, true);
+
+			_mainEditView.execute(SCI_SETVIRTUALSPACEOPTIONS, SCVS_RECTANGULARSELECTION);
+			_subEditView.execute(SCI_SETVIRTUALSPACEOPTIONS, SCVS_RECTANGULARSELECTION);
 
 			TabBarPlus::doDragNDrop(true);
 
@@ -8731,6 +8719,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			saveShortcuts();
 			if (nppgui._rememberLastSession)
 				saveSession(currentSession);
+
 
 			//Sends WM_DESTROY, Notepad++ will end
 			::DestroyWindow(hwnd);
