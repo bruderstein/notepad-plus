@@ -184,7 +184,7 @@ void Searching::displaySectionCentered(int posStart, int posEnd, ScintillaEditVi
 	pEditView->execute(SCI_SETANCHOR, posStart);	
 }
 
-LONG FindReplaceDlg::originalFinderProc = NULL;
+LONG_PTR FindReplaceDlg::originalFinderProc = NULL;
 
 void FindReplaceDlg::destroy()
 {
@@ -1888,7 +1888,9 @@ void FindReplaceDlg::findAllIn(InWhat op)
 		_pFinder->_scintView.init(_hInst, _pFinder->getHSelf());
 
 		// Subclass the ScintillaEditView for the Finder (Scintilla doesn't notify all key presses)
-		originalFinderProc = SetWindowLong( _pFinder->_scintView.getHSelf(), GWL_WNDPROC, (LONG) finderProc);
+		originalFinderProc = GetWindowLongPtr(_pFinder->_scintView.getHSelf(), GWLP_WNDPROC);
+
+		SetWindowLongPtr( _pFinder->_scintView.getHSelf(), GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(finderProc));
 
 		_pFinder->setFinderReadOnly(true);
 		_pFinder->_scintView.execute(SCI_SETCODEPAGE, SC_CP_UTF8);
@@ -2135,8 +2137,8 @@ LRESULT FAR PASCAL FindReplaceDlg::finderProc( HWND hwnd, UINT message, WPARAM w
 {
 	if (message == WM_KEYDOWN && (wParam == VK_DELETE || wParam == VK_RETURN))
 	{
-		ScintillaEditView *pScint = (ScintillaEditView *)(::GetWindowLongPtr(hwnd, GWL_USERDATA));
-		Finder *pFinder = (Finder *)(::GetWindowLongPtr(pScint->getHParent(), GWL_USERDATA));
+		ScintillaEditView *pScint = (ScintillaEditView *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		Finder *pFinder = (Finder *)(::GetWindowLongPtr(pScint->getHParent(), GWLP_USERDATA));
 		if (wParam == VK_RETURN)
 			pFinder->GotoFoundLine();
 		else // VK_DELETE

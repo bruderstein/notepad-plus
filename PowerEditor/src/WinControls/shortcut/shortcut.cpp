@@ -709,7 +709,7 @@ void recordedMacroStep::PlayBack(Window* pNotepad, ScintillaEditView *pEditView)
 	{
 		long lParam = lParameter;
 		if (MacroType == mtUseSParameter)
-			lParam = reinterpret_cast<long>(sParameter.c_str());
+			lParam = reinterpret_cast<LONG_PTR>(sParameter.c_str());
 		pEditView->execute(message, wParameter, lParam);
 		if ( (message == SCI_SETTEXT)
 			|| (message == SCI_REPLACESEL) 

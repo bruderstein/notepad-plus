@@ -1424,7 +1424,7 @@ void UserDefineDialog::changeStyle()
     _status = !_status;
     ::SetDlgItemText(_hSelf, IDC_DOCK_BUTTON, (_status == DOCK)?TEXT("Undock"):TEXT("Dock"));
 
-    long style = ::GetWindowLongPtr(_hSelf, GWL_STYLE);
+    LONG_PTR style = ::GetWindowLongPtr(_hSelf, GWL_STYLE);
     if (!style)
         ::MessageBox(NULL, TEXT("GetWindowLongPtr failed"), TEXT(""), MB_OK);
 
@@ -1432,7 +1432,7 @@ void UserDefineDialog::changeStyle()
         ((style & ~WS_POPUP) & ~DS_MODALFRAME & ~WS_CAPTION) | WS_CHILD :
         (style & ~WS_CHILD) | WS_POPUP | DS_MODALFRAME | WS_CAPTION;
 
-    long result = ::SetWindowLongPtr(_hSelf, GWL_STYLE, style);
+    LONG_PTR result = ::SetWindowLongPtr(_hSelf, GWL_STYLE, style);
     if (!result)
         ::MessageBox(NULL, TEXT("SetWindowLongPtr failed"), TEXT(""), MB_OK);    
 

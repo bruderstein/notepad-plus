@@ -390,7 +390,7 @@ UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			NppParameters *pNppParam = NppParameters::getInstance();
 			int index = pNppParam->getFileSaveDlgFilterIndex();
 
-			::SetWindowLongPtr(hWnd, GWL_USERDATA, (long)staticThis);
+			::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(staticThis));
 			hFileDlg = ::GetParent(hWnd);
 			goToCenter(hFileDlg);
 
@@ -401,16 +401,16 @@ UINT_PTR CALLBACK FileDialog::OFNHookProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			}
 
 			// Don't touch the following 3 lines, they are cursed !!!
-			oldProc = (WNDPROC)::GetWindowLongPtr(hFileDlg, GWL_WNDPROC);
-			if ((long)oldProc > 0)
-				::SetWindowLongPtr(hFileDlg, GWL_WNDPROC, (LONG)fileDlgProc);
+			oldProc = (WNDPROC)::GetWindowLongPtr(hFileDlg, GWLP_WNDPROC);
+			if (oldProc != 0)
+				::SetWindowLongPtr(hFileDlg, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(fileDlgProc));
 
 			return FALSE;
 		}
 
 		default :
 		{
-			FileDialog *pFileDialog = reinterpret_cast<FileDialog *>(::GetWindowLongPtr(hWnd, GWL_USERDATA));
+			FileDialog *pFileDialog = reinterpret_cast<FileDialog *>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 			if (!pFileDialog)
 			{
 				return FALSE;

@@ -49,7 +49,12 @@ public :
 	};
 	virtual void display(bool toShow = true) const {
 		Window::display(toShow);
-		
+		/* These asserts have been added as there were issues when porting
+		 * to x64 that meant that if bad pointers were passed around,
+		 * these weren't initialised. Exact cause was never found.
+		 */
+		assert(_pWin0);
+		assert(_pWin1);
 		_pWin0->display(toShow);
 		_pWin1->display(toShow);
 		_splitter.display(toShow);

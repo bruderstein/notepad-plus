@@ -4815,7 +4815,7 @@ void Notepad_plus::command(int id)
 		case IDM_EDIT_RTL :
 		case IDM_EDIT_LTR :
 		{
-			long exStyle = ::GetWindowLongPtr(_pEditView->getHSelf(), GWL_EXSTYLE);
+			LONG_PTR exStyle = ::GetWindowLongPtr(_pEditView->getHSelf(), GWL_STYLE);
 			exStyle = (id == IDM_EDIT_RTL)?exStyle|WS_EX_LAYOUTRTL:exStyle&(~WS_EX_LAYOUTRTL);
 			::SetWindowLongPtr(_pEditView->getHSelf(), GWL_EXSTYLE, exStyle);
 			_pEditView->redraw();
@@ -9703,18 +9703,18 @@ LRESULT CALLBACK Notepad_plus::Notepad_plus_Proc(HWND hwnd, UINT Message, WPARAM
   switch(Message)
   {
     case WM_NCCREATE : // First message we get the ptr of instantiated object
-                       // then stock it into GWL_USERDATA index in order to retrieve afterward
+                       // then stock it into GWLP_USERDATA index in order to retrieve afterward
 	{
 		Notepad_plus *pM30ide = (Notepad_plus *)(((LPCREATESTRUCT)lParam)->lpCreateParams);
 		pM30ide->_hSelf = hwnd;
-		::SetWindowLongPtr(hwnd, GWL_USERDATA, (LONG)pM30ide);
+		::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pM30ide));
 
 		return TRUE;
 	}
 
     default :
     {
-      return ((Notepad_plus *)::GetWindowLongPtr(hwnd, GWL_USERDATA))->runProc(hwnd, Message, wParam, lParam);
+      return ((Notepad_plus *)::GetWindowLongPtr(hwnd, GWLP_USERDATA))->runProc(hwnd, Message, wParam, lParam);
     }
   }
 }

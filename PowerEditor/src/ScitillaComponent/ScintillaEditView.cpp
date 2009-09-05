@@ -248,15 +248,15 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 	//Use either Unicode or ANSI setwindowlong, depending on environment
 	if (::IsWindowUnicode(_hSelf)) 
 	{
-		::SetWindowLongPtrW(_hSelf, GWL_USERDATA, reinterpret_cast<LONG>(this));
+		::SetWindowLongPtrW(_hSelf, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		_callWindowProc = CallWindowProcW;
-		_scintillaDefaultProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(_hSelf, GWL_WNDPROC, reinterpret_cast<LONG>(scintillaStatic_Proc)));
+		_scintillaDefaultProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrW(_hSelf, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(scintillaStatic_Proc)));
 	}
 	else 
 	{
-		::SetWindowLongPtrA(_hSelf, GWL_USERDATA, reinterpret_cast<LONG>(this));
+		::SetWindowLongPtrA(_hSelf, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		_callWindowProc = CallWindowProcA;
-		_scintillaDefaultProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrA(_hSelf, GWL_WNDPROC, reinterpret_cast<LONG>(scintillaStatic_Proc)));
+		_scintillaDefaultProc = reinterpret_cast<WNDPROC>(::SetWindowLongPtrA(_hSelf, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(scintillaStatic_Proc)));
 	}
 
 	//Get the startup document and make a buffer for it so it can be accessed like a file
@@ -279,8 +279,8 @@ LRESULT ScintillaEditView::scintillaNew_Proc(HWND hwnd, UINT Message, WPARAM wPa
 					generic_string str(1, (TCHAR)wParam);
 					columnReplace(colInfos, str.c_str());
 
-					int selStart = execute(SCI_GETSELECTIONSTART)+1;
-					int selEnd = execute(SCI_GETSELECTIONEND);
+					LRESULT selStart = execute(SCI_GETSELECTIONSTART)+1;
+					LRESULT selEnd = execute(SCI_GETSELECTIONEND);
 					execute(SCI_SETSELECTIONSTART, selStart);
 					execute(SCI_SETSELECTIONEND, selEnd);
 
@@ -3080,7 +3080,7 @@ bool ScintillaEditView::isSelecting() const
 
 LRESULT CALLBACK ScintillaEditView::scintillaStatic_Proc( HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam )
 {
-	ScintillaEditView *pScint = (ScintillaEditView *)(::GetWindowLongPtr(hwnd, GWL_USERDATA));
+	ScintillaEditView *pScint = (ScintillaEditView *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
 	//
 	if (Message == WM_MOUSEWHEEL || Message == WM_MOUSEHWHEEL)
 	{
@@ -3088,7 +3088,7 @@ LRESULT CALLBACK ScintillaEditView::scintillaStatic_Proc( HWND hwnd, UINT Messag
 		POINTS pts = MAKEPOINTS(lParam);
 		POINTSTOPOINT(pt, pts);
 		HWND hwndOnMouse = WindowFromPoint(pt);
-		ScintillaEditView *pScintillaOnMouse = (ScintillaEditView *)(::GetWindowLongPtr(hwndOnMouse, GWL_USERDATA));
+		ScintillaEditView *pScintillaOnMouse = (ScintillaEditView *)(::GetWindowLongPtr(hwndOnMouse, GWLP_USERDATA));
 		if (pScintillaOnMouse != pScint)
 			return ::SendMessage(hwndOnMouse, Message, wParam, lParam);
 	}

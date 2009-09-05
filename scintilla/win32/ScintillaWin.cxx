@@ -2453,7 +2453,7 @@ sptr_t PASCAL ScintillaWin::CTWndProc(
 }
 
 sptr_t ScintillaWin::DirectFunction(
-    ScintillaWin *sci, UINT iMessage, uptr_t wParam, sptr_t lParam) {
+    ScintillaWin *sci, UINT iMessage, WPARAM wParam, LPARAM lParam) {
 	PLATFORM_ASSERT(::GetCurrentThreadId() == ::GetWindowThreadProcessId(sci->MainHWND(), NULL));
 	return sci->WndProc(iMessage, wParam, lParam);
 }

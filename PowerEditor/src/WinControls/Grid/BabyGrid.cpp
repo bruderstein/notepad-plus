@@ -1717,7 +1717,7 @@ LRESULT CALLBACK GridProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                    int j,k,c;
                    TCHAR tbuffer[1000];
                    //it was found, get it
-                   SendMessage(BGHS[SelfIndex].hlist1,LB_GETTEXT,FindResult,(long)lParam);
+                   SendMessage(BGHS[SelfIndex].hlist1,LB_GETTEXT,FindResult,lParam);
                    lstrcpy(tbuffer,(TCHAR*)lParam);
                    k=lstrlen(tbuffer);
                    c=0;

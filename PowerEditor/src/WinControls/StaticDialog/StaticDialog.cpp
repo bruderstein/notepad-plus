@@ -23,7 +23,7 @@
 StaticDialog::~StaticDialog()
 {
 	if (Window::isCreated()) {
-		::SetWindowLongPtr(_hSelf, GWL_USERDATA, (long)NULL);	//Prevent run_dlgProc from doing anything, since its virtual
+		::SetWindowLongPtr(_hSelf, GWLP_USERDATA, NULL);	//Prevent run_dlgProc from doing anything, since its virtual
 
 		// Can't call an actual virtual function in a destructor, 
 		// as the virtual table is destroyed or in the process of being destroyed.
@@ -131,7 +131,7 @@ BOOL CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 		{
 			StaticDialog *pStaticDlg = (StaticDialog *)(lParam);
 			pStaticDlg->_hSelf = hwnd;
-			::SetWindowLongPtr(hwnd, GWL_USERDATA, (long)lParam);
+			::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pStaticDlg));
 			::GetWindowRect(hwnd, &(pStaticDlg->_rc));
             pStaticDlg->run_dlgProc(message, wParam, lParam);
 			
@@ -140,7 +140,7 @@ BOOL CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPAR
 
 		default :
 		{
-			StaticDialog *pStaticDlg = reinterpret_cast<StaticDialog *>(::GetWindowLongPtr(hwnd, GWL_USERDATA));
+			StaticDialog *pStaticDlg = reinterpret_cast<StaticDialog *>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
 			if (!pStaticDlg)
 				return FALSE;
 			return pStaticDlg->run_dlgProc(message, wParam, lParam);

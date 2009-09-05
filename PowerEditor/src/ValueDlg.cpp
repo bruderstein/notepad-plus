@@ -33,9 +33,9 @@ int ValueDlg::doDialog( POINT p, bool isRTL /*= false*/ )
 	{
 		DLGTEMPLATE *pMyDlgTemplate = NULL;
 		HGLOBAL hMyDlgTemplate = makeRTLResource(IDD_VALUE_DLG, &pMyDlgTemplate);
-		int result = ::DialogBoxIndirectParam(_hInst, pMyDlgTemplate, _hParent,  (DLGPROC)dlgProc, (LPARAM)this);
+		INT_PTR result = ::DialogBoxIndirectParam(_hInst, pMyDlgTemplate, _hParent,  (DLGPROC)dlgProc, (LPARAM)this);
 		::GlobalFree(hMyDlgTemplate);
-		return result;
+		return (int)result;
 	}
 	return ::DialogBoxParam(_hInst, MAKEINTRESOURCE(IDD_VALUE_DLG), _hParent,  (DLGPROC)dlgProc, (LPARAM)this);
 }

@@ -65,7 +65,7 @@ void BabyGridWrapper::setText( size_t row, size_t col, const TCHAR *text )
 	_BGCELL cell;
 	cell.row = row;
 	cell.col = col;
-	::SendMessage(_hSelf, BGM_SETCELLDATA, (UINT)&cell, (long)text);
+	::SendMessage(_hSelf, BGM_SETCELLDATA, (UINT)&cell, reinterpret_cast<LONG_PTR>(text));
 }
 
 void BabyGridWrapper::makeColAutoWidth( bool autoWidth /*= true*/ )
