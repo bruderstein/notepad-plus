@@ -38,6 +38,11 @@
 #include "Notepad_plus_msgs.h"
 #endif
 
+#ifndef NUMBERTYPES_H
+#include "NumberTypes.h"
+#endif
+
+
 // To be removed later.  Need to be included since Parameters.h was removed from ScintillaEditView.h
 #ifndef SHORTCUTS_H
 #include "shortcut.h"
@@ -343,7 +348,7 @@ private:
 	//Synchronized Scolling
 	
 	struct SyncInfo {
-		int _line;
+		LINENUMBER _line;
 		int _column;
 		bool _isSynScollV;
 		bool _isSynScollH;

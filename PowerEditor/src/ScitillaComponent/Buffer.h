@@ -30,6 +30,10 @@
 #include "Parameters_def.h"
 #endif
 
+#ifndef NUMBERTYPES_H
+#include "NumberTypes.h"
+#endif
+
 struct Position;
 struct Lang;
 class ScintillaEditView;
@@ -62,8 +66,8 @@ enum BufferStatusInfo {
 
 struct HeaderLineState {
 	HeaderLineState() : _headerLineNumber(0), _isExpanded(true){};
-	HeaderLineState(int lineNumber, bool isExpanded) : _headerLineNumber(lineNumber), _isExpanded(isExpanded){};
-	int _headerLineNumber;
+	HeaderLineState(LINENUMBER lineNumber, bool isExpanded) : _headerLineNumber(lineNumber), _isExpanded(isExpanded){};
+	LINENUMBER _headerLineNumber;
 	bool _isExpanded;
 };
 
@@ -131,7 +135,7 @@ private:
 
 	std::vector<Buffer *> _buffers;
 	BufferID _nextBufferID;
-	size_t _nrBufs;
+	int _nrBufs;
 
 	bool loadFileData(Document doc, const TCHAR * filename, Utf8_16_Read * UnicodeConvertor, LangType language);
 };

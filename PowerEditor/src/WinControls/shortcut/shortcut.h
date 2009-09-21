@@ -144,15 +144,15 @@ struct recordedMacroStep {
 	enum MacroTypeIndex {mtUseLParameter, mtUseSParameter, mtMenuCommand};
 	
 	int message;
-	long wParameter;
-	long lParameter;
+	WPARAM wParameter;
+	LPARAM lParameter;
 	generic_string sParameter;
 	MacroTypeIndex MacroType;
 	
-	recordedMacroStep(int iMessage, long wParam, long lParam);
+	recordedMacroStep(int iMessage, WPARAM wParam, LPARAM lParam);
 	recordedMacroStep(int iCommandID) : message(0), wParameter(iCommandID), lParameter(0), MacroType(mtMenuCommand) {};
 
-	recordedMacroStep(int type, int iMessage, long wParam, long lParam, const TCHAR *sParam)
+	recordedMacroStep(int type, int iMessage, WPARAM wParam, LPARAM lParam, const TCHAR *sParam)
 		: message(iMessage), wParameter(wParam), lParameter(lParam), MacroType(MacroTypeIndex(type)){
 		sParameter = *reinterpret_cast<const TCHAR *>(sParam);	
 	};

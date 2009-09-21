@@ -1294,8 +1294,8 @@ bool NppParameters::getSessionFromXmlTree(TiXmlDocument *pSessionDoc, Session *p
 
 	
 	TiXmlElement *actView = sessionRoot->ToElement();
-	size_t index;
-	const TCHAR *str = actView->Attribute(TEXT("activeView"), (int *)&index);
+	int index;
+	const TCHAR *str = actView->Attribute(TEXT("activeView"), &index);
 	if (str)
 	{
 		(*ptrSession)._activeView = index;
@@ -1319,10 +1319,10 @@ bool NppParameters::getSessionFromXmlTree(TiXmlDocument *pSessionDoc, Session *p
 			if (fileName)
 			{
 				Position position;
-				(childNode->ToElement())->Attribute(TEXT("firstVisibleLine"), &position._firstVisibleLine);
-				(childNode->ToElement())->Attribute(TEXT("xOffset"), &position._xOffset);
-				(childNode->ToElement())->Attribute(TEXT("startPos"), &position._startPos);
-				(childNode->ToElement())->Attribute(TEXT("endPos"), &position._endPos);
+				position._firstVisibleLine = generic_atoz((childNode->ToElement())->Attribute(TEXT("firstVisibleLine")));
+				position._xOffset = generic_atoz((childNode->ToElement())->Attribute(TEXT("xOffset")));
+				position._startPos = generic_atoz((childNode->ToElement())->Attribute(TEXT("startPos")));
+				position._endPos = generic_atoz((childNode->ToElement())->Attribute(TEXT("endPos")));
 				(childNode->ToElement())->Attribute(TEXT("selMode"), &position._selMode);
 				(childNode->ToElement())->Attribute(TEXT("scrollWidth"), &position._scrollWidth);
 
@@ -1364,10 +1364,10 @@ bool NppParameters::getSessionFromXmlTree(TiXmlDocument *pSessionDoc, Session *p
 			{
 
 				Position position;
-				(childNode->ToElement())->Attribute(TEXT("firstVisibleLine"), &position._firstVisibleLine);
-				(childNode->ToElement())->Attribute(TEXT("xOffset"), &position._xOffset);
-				(childNode->ToElement())->Attribute(TEXT("startPos"), &position._startPos);
-				(childNode->ToElement())->Attribute(TEXT("endPos"), &position._endPos);
+				position._firstVisibleLine = generic_atoz((childNode->ToElement())->Attribute(TEXT("firstVisibleLine")));
+				position._xOffset = generic_atoz((childNode->ToElement())->Attribute(TEXT("xOffset")));
+				position._startPos = generic_atoz((childNode->ToElement())->Attribute(TEXT("startPos")));
+				position._endPos = generic_atoz((childNode->ToElement())->Attribute(TEXT("endPos")));
 				(childNode->ToElement())->Attribute(TEXT("selMode"), &position._selMode);
 				(childNode->ToElement())->Attribute(TEXT("scrollWidth"), &position._scrollWidth);
 
@@ -1574,7 +1574,8 @@ void NppParameters::feedMacros(TiXmlNode *node)
 		{
 			Macro macro;
 			getActions(childNode, macro);
-			int cmdID = ID_MACRO + _macros.size();
+			assert(_macros.size() == static_cast<int>(_macros.size()));
+			int cmdID = ID_MACRO + static_cast<int>(_macros.size());
 			MacroShortcut ms(sc, macro, cmdID);
 			//if (ms.isValid())
 			_macros.push_back(ms);
@@ -1631,7 +1632,8 @@ void NppParameters::feedUserCmds(TiXmlNode *node)
 				const TCHAR *cmdStr = aNode->Value();
 				if (cmdStr)
 				{
-					int cmdID = ID_USER_CMD + _userCommands.size();
+					assert(_userCommands.size() == static_cast<int>(_userCommands.size()));
+					int cmdID = ID_USER_CMD + static_cast<int>(_userCommands.size());
 					UserCommand uc(sc, cmdStr, cmdID);
 					//if (uc.isValid())
 					_userCommands.push_back(uc);
@@ -1696,8 +1698,9 @@ void NppParameters::feedScintKeys(TiXmlNode *node)
 			continue;
 		
 		//Find the corresponding scintillacommand and alter it, put the index in the list
-		size_t len = _scintillaKeyCommands.size();
-		for(size_t i = 0; i < len; i++) 
+		assert(_scintillaKeyCommands.size() == static_cast<int>(_scintillaKeyCommands.size()));
+		int len = static_cast<int>(_scintillaKeyCommands.size());
+		for(int i = 0; i < len; i++) 
 		{
 			ScintillaKeyMap & skmOrig = _scintillaKeyCommands[i];
 			if (skmOrig.getScintillaKeyID() == scintKey && skmOrig.getMenuCmdID() == menuID)
@@ -1855,14 +1858,18 @@ void NppParameters::insertMacro(TiXmlNode *macrosRoot, const MacroShortcut & mac
 	macroRoot->ToElement()->SetAttribute(TEXT("Alt"), key._isAlt?TEXT("yes"):TEXT("no"));
 	macroRoot->ToElement()->SetAttribute(TEXT("Shift"), key._isShift?TEXT("yes"):TEXT("no"));
 	macroRoot->ToElement()->SetAttribute(TEXT("Key"), key._key);
+	
+	TCHAR tmpBuf[20];
 	for (size_t i = 0 ; i < macro._macro.size() ; i++)
 	{
 		TiXmlNode *actionNode = macroRoot->InsertEndChild(TiXmlElement(TEXT("Action")));
 		const recordedMacroStep & action = macro._macro[i];
 		actionNode->ToElement()->SetAttribute(TEXT("type"), action.MacroType);
 		actionNode->ToElement()->SetAttribute(TEXT("message"), action.message);
-		actionNode->ToElement()->SetAttribute(TEXT("wParam"), action.wParameter);
-		actionNode->ToElement()->SetAttribute(TEXT("lParam"), action.lParameter);
+		generic_ztoa(action.wParameter, tmpBuf, 20, 10);
+		actionNode->ToElement()->SetAttribute(TEXT("wParam"), tmpBuf);
+		generic_ztoa(action.lParameter, tmpBuf, 20, 10);
+		actionNode->ToElement()->SetAttribute(TEXT("lParam"), tmpBuf);
 		actionNode->ToElement()->SetAttribute(TEXT("sParam"), action.sParameter.c_str());
 	}
 }
@@ -1905,10 +1912,11 @@ void NppParameters::insertScintKey(TiXmlNode *scintKeyRoot, const ScintillaKeyMa
 	keyRoot->ToElement()->SetAttribute(TEXT("Key"), key._key);
 
 	//Add additional shortcuts
-	size_t size = scintKeyMap.getSize();
+	assert(scintKeyMap.getSize() == static_cast<int>(scintKeyMap.getSize()));
+	int size = static_cast<int>(scintKeyMap.getSize());
 	if (size > 1) {
 		TiXmlNode * keyNext;
-		for(size_t i = 1; i < size; i++) {
+		for(int i = 1; i < size; i++) {
 			keyNext = keyRoot->InsertEndChild(TiXmlElement(TEXT("NextKey")));
 			key = scintKeyMap.getKeyComboByIndex(i);
 			keyNext->ToElement()->SetAttribute(TEXT("Ctrl"), key._isCtrl?TEXT("yes"):TEXT("no"));

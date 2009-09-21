@@ -26,7 +26,7 @@ void ValueDlg::init( HINSTANCE hInst, HWND parent, int valueToSet, const TCHAR *
 	_name = text;
 }
 
-int ValueDlg::doDialog( POINT p, bool isRTL /*= false*/ )
+INT_PTR ValueDlg::doDialog( POINT p, bool isRTL /*= false*/ )
 {
 	_p = p;
 	if (isRTL)

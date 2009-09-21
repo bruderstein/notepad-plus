@@ -22,6 +22,10 @@
 #include "StaticDialog.h"
 #endif
 
+#ifndef NUMBERTYPES_H
+#include "NumberTypes.h"
+#endif
+
 #define DEFAULT_NB_NUMBER 2
 
 class ValueDlg : public StaticDialog
@@ -37,7 +41,7 @@ public :
 		//lint -e1411
         void init(HINSTANCE hInst, HWND parent, int valueToSet, const TCHAR *text);
 		//lint +e1411
-        int doDialog(POINT p, bool isRTL = false);
+        INT_PTR doDialog(POINT p, bool isRTL = false);
 		void setNBNumber(int nbNumber);
 		int reSizeValueBox();
 

@@ -20,10 +20,10 @@
 
 struct Position
 { 
-	int _firstVisibleLine;
-	int _startPos;
-	int _endPos;
-	int _xOffset;
+	size_t _firstVisibleLine;
+	size_t _startPos;
+	size_t _endPos;
+	size_t _xOffset;
 	int _selMode;
 	int _scrollWidth;
 	Position() : _firstVisibleLine(0), _startPos(0), _endPos(0), _xOffset(0), _selMode(0), _scrollWidth(1) {}
@@ -42,11 +42,21 @@ struct sessionFileInfo : public Position {
 };
 
 struct Session {
-	size_t nbMainFiles() const {return _mainViewFiles.size();};
-	size_t nbSubFiles() const {return _subViewFiles.size();};
-	size_t _activeView;
-	size_t _activeMainIndex;
-	size_t _activeSubIndex;
+	int nbMainFiles() const 
+	{
+		assert(_mainViewFiles.size() == static_cast<int>(_mainViewFiles.size()));
+		return static_cast<int>(_mainViewFiles.size());
+	};
+
+	int nbSubFiles() const 
+	{
+		assert(_subViewFiles.size() == static_cast<int>(_subViewFiles.size()));
+		return static_cast<int>(_subViewFiles.size());
+	};
+
+	int _activeView;
+	int _activeMainIndex;
+	int _activeSubIndex;
 	std::vector<sessionFileInfo> _mainViewFiles;
 	std::vector<sessionFileInfo> _subViewFiles;
 };

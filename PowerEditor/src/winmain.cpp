@@ -97,7 +97,8 @@ void parseCommandLine(TCHAR * commandLine, ParamVector & paramVector) {
 }
 
 bool isInList(const TCHAR *token2Find, ParamVector & params) {
-	int nrItems = params.size();
+	assert(params.size() == static_cast<int>(params.size()));
+	int nrItems = static_cast<int>(params.size());
 
 	for (int i = 0; i < nrItems; i++)
 	{
@@ -111,7 +112,8 @@ bool isInList(const TCHAR *token2Find, ParamVector & params) {
 
 bool getParamVal(TCHAR c, ParamVector & params, generic_string & value) {
 	value = TEXT("");
-	int nrItems = params.size();
+	assert(params.size() == static_cast<int>(params.size()));
+	int nrItems = static_cast<int>(params.size());
 
 	for (int i = 0; i < nrItems; i++)
 	{

@@ -1002,7 +1002,8 @@ private:
 	static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX * /*lpntme*/, int /*FontType*/, LPARAM lParam)
 	{
 		std::vector<generic_string> *pStrVect = (std::vector<generic_string> *)lParam;
-        size_t vectSize = pStrVect->size();
+		assert(pStrVect->size() == static_cast<int>(pStrVect->size()));
+        int vectSize = static_cast<int>(pStrVect->size());
 
 		//Search through all the fonts, EnumFontFamiliesEx never states anything about order
 		//Start at the end though, that's the most likely place to find a duplicate

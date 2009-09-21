@@ -187,6 +187,7 @@ void Utf8_16_Read::determineEncoding()
 {
 	m_eEncoding = uni8Bit;
 	m_nSkip = 0;
+	assert(m_nLen == static_cast<int>(m_nLen));
 
     // detect UTF-16 big-endian with BOM
 	if (m_nLen > 1 && m_pBuf[0] == k_Boms[uni16BE][0] && m_pBuf[1] == k_Boms[uni16BE][1])
@@ -208,7 +209,7 @@ void Utf8_16_Read::determineEncoding()
 		m_nSkip = 3;
 	}
 	// try to detect UTF-16 little-endian without BOM
-	else if (m_nLen > 1 && m_pBuf[0] != NULL && m_pBuf[1] == NULL && IsTextUnicode(m_pBuf, m_nLen, NULL))
+	else if (m_nLen > 1 && m_pBuf[0] != NULL && m_pBuf[1] == NULL && IsTextUnicode(m_pBuf, static_cast<int>(m_nLen), NULL))
 	{
 		m_eEncoding = uni16LE_NoBOM;
 		m_nSkip = 0;

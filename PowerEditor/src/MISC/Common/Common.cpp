@@ -17,6 +17,10 @@
 
 #include "precompiled_headers.h"
 
+#ifndef NUMBERTYPES_H
+#include "NumberTypes.h"
+#endif
+
 WcharMbcsConvertor * WcharMbcsConvertor::_pSelf = new WcharMbcsConvertor;
 
 // Set a call back with the handle after init to set the path.
@@ -461,7 +465,8 @@ TCHAR *BuildMenuFileName(TCHAR *buffer, int len, int pos, const TCHAR *filename)
 		}
 		else
 		{
-			int n = (len-3-(itr-buffer))/2;
+			// X64CLEANUP - was "int n". As there's pointer arithmetic here, DOCPOSITION seemed most logical
+			DOCPOSITION n = (len-3-(itr-buffer))/2;
 			generic_strncpy(cnvName, s1, n);
 			lstrcpy(cnvName+n, TEXT("..."));
 			lstrcat(cnvName, s1 + lstrlen(s1) - n);
@@ -472,7 +477,8 @@ TCHAR *BuildMenuFileName(TCHAR *buffer, int len, int pos, const TCHAR *filename)
 	{
 		TCHAR cnvName[MAX_PATH*2];
 		convertFileName(cnvName, filename);
-		PathCompactPathEx(itr, filename, len - (itr-buffer), 0);
+		assert(len - (itr-buffer) == static_cast<UINT>(len - (itr-buffer)));
+		PathCompactPathEx(itr, filename, static_cast<UINT>(len - (itr-buffer)), 0);
 	}
 	return buffer;
 }

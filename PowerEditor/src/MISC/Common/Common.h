@@ -42,6 +42,14 @@
 	#define generic_stat _wstat
 	//#define generic_string std::wstring
 	#define COPYDATA_FILENAMES COPYDATA_FILENAMESW
+	#ifdef _W64
+		#define generic_atoz _wtoi64
+	    #define generic_ztoa _i64tow_s
+	#else
+		#define generic_atoz _wtol
+		#define generic_ztoa _wtoi64
+	#endif
+
 #else
 	#define NppMainEntry WinMain
 	#define generic_strtol strtol
@@ -63,9 +71,18 @@
 	#define generic_stat _stat
 	//#define generic_string std::string
 	#define COPYDATA_FILENAMES COPYDATA_FILENAMESA
+
+	#ifdef _W64
+		#define generic_atoz _atoi64
+		#define generic_ztoa _i64toa_s
+	#else
+		#define generic_atoz _atol
+		#define generic_ztoa _ltoa_s
+	#endif
 #endif
 
 typedef std::basic_string<TCHAR, std::char_traits<TCHAR>, std::allocator<TCHAR> > generic_string;
+
 
 void folderBrowser(HWND parent, int outputCtrlID, const TCHAR *defaultStr = NULL);
 

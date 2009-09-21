@@ -89,8 +89,9 @@ public:
 		return _isFloating;
 	}
 
-	INT getElementCnt() {
-		return _vTbData.size();
+	int getElementCnt() {
+		assert(_vTbData.size() == static_cast<int>(_vTbData.size()));
+		return static_cast<int>(_vTbData.size());
 	}
 
 	// interface function for gripper

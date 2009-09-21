@@ -634,7 +634,7 @@ void Notepad_plus::saveDockingParams()
 	// save every container
 	std::vector<DockingCont*> vCont = _dockingManager->getContainerInfo();
 
-	for (size_t i = 0 ; i < vCont.size() ; i++)
+	for (int i = 0 ; i < vCont.size() ; i++)
 	{
 		// save at first the visible Tb's
 		std::vector<tTbData *>	vDataVis	= vCont[i]->getDataOfVisTb();
@@ -1778,12 +1778,12 @@ void Notepad_plus::saveSession(const Session & session)
 void Notepad_plus::doTrimTrailing() 
 {
 	_pEditView->execute(SCI_BEGINUNDOACTION);
-	int nbLines = _pEditView->execute(SCI_GETLINECOUNT);
-	for (int line = 0 ; line < nbLines ; line++)
+	LINENUMBER nbLines = static_cast<int>(_pEditView->execute(SCI_GETLINECOUNT));
+	for (LINENUMBER line = 0 ; line < nbLines ; line++)
 	{
-		int lineStart = _pEditView->execute(SCI_POSITIONFROMLINE,line);
-		int lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION,line);
-		int i = lineEnd - 1;
+		LINENUMBER lineStart = _pEditView->execute(SCI_POSITIONFROMLINE,line);
+		LINENUMBER lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION,line);
+		LINENUMBER i = lineEnd - 1;
 		char c = (char)_pEditView->execute(SCI_GETCHARAT,i);
 
 		for ( ; (i >= lineStart) && (c == ' ') || (c == '\t') ; c = (char)_pEditView->execute(SCI_GETCHARAT,i))
@@ -2806,7 +2806,7 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 	{
 		if (_isHotspotDblClicked)
 		{
-			int pos = notifyView->execute(SCI_GETCURRENTPOS);
+			DOCPOSITION pos = notifyView->execute(SCI_GETCURRENTPOS);
 			notifyView->execute(SCI_SETCURRENTPOS, pos);
 			notifyView->execute(SCI_SETANCHOR, pos);
 			_isHotspotDblClicked = false;
@@ -2931,18 +2931,18 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 	{
 		notifyView->execute(SCI_SETWORDCHARS, 0, (LPARAM)"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.:?&@=/%#");
 		
-		int pos = notifyView->execute(SCI_GETCURRENTPOS);
-		int startPos = static_cast<int>(notifyView->execute(SCI_WORDSTARTPOSITION, pos, false));
-		int endPos = static_cast<int>(notifyView->execute(SCI_WORDENDPOSITION, pos, false));
+		DOCPOSITION pos = notifyView->execute(SCI_GETCURRENTPOS);
+		DOCPOSITION startPos = notifyView->execute(SCI_WORDSTARTPOSITION, pos, false);
+		DOCPOSITION endPos = notifyView->execute(SCI_WORDENDPOSITION, pos, false);
 
 		notifyView->execute(SCI_SETTARGETSTART, startPos);
 		notifyView->execute(SCI_SETTARGETEND, endPos);
 	
-		int posFound = notifyView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), (LPARAM)urlHttpRegExpr);
+		DOCPOSITION posFound = notifyView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), reinterpret_cast<LONG_PTR>(urlHttpRegExpr));
 		if (posFound != -1)
 		{
-			startPos = int(notifyView->execute(SCI_GETTARGETSTART));
-			endPos = int(notifyView->execute(SCI_GETTARGETEND));
+			startPos = notifyView->execute(SCI_GETTARGETSTART);
+			endPos = notifyView->execute(SCI_GETTARGETEND);
 		}
 
 		TCHAR currentWord[MAX_PATH*2];
@@ -2956,8 +2956,8 @@ BOOL Notepad_plus::notify(SCNotification *notification)
 
 	case SCN_NEEDSHOWN :
 	{
-		int begin = notifyView->execute(SCI_LINEFROMPOSITION, notification->position);
-		int end = notifyView->execute(SCI_LINEFROMPOSITION, notification->position + notification->length);
+		int begin = static_cast<int>(notifyView->execute(SCI_LINEFROMPOSITION, notification->position));
+		int end = static_cast<int>(notifyView->execute(SCI_LINEFROMPOSITION, notification->position + notification->length));
 		int firstLine = begin < end ? begin : end;
 		int lastLine = begin > end ? begin : end;
 		for (int line = firstLine; line <= lastLine; line++) {
@@ -3087,11 +3087,11 @@ void Notepad_plus::charAdded(TCHAR chAdded)
 void Notepad_plus::addHotSpot(bool docIsModifing)
 {
 	//bool docIsModifing = true;
-	int posBegin2style = 0;
+	DOCPOSITION posBegin2style = 0;
 	if (docIsModifing)
 		posBegin2style = _pEditView->execute(SCI_GETCURRENTPOS);
 
-	int endStyle = _pEditView->execute(SCI_GETENDSTYLED);
+	DOCPOSITION endStyle = _pEditView->execute(SCI_GETENDSTYLED);
 	if (docIsModifing)
 	{
 
@@ -3102,7 +3102,8 @@ void Notepad_plus::addHotSpot(bool docIsModifing)
 		// determinating the type of EOF to make sure how many steps should we be back
 		if ((ch == 0x0A) || (ch == 0x0D))
 		{
-			int eolMode = _pEditView->execute(SCI_GETEOLMODE);
+			assert(_pEditView->execute(SCI_GETEOLMODE) == static_cast<int>(_pEditView->execute(SCI_GETEOLMODE)));
+			int eolMode = static_cast<int>(_pEditView->execute(SCI_GETEOLMODE));
 			
 			if ((eolMode == SC_EOL_CRLF) && (posBegin2style > 1))
 				posBegin2style -= 2;
@@ -3117,12 +3118,12 @@ void Notepad_plus::addHotSpot(bool docIsModifing)
 		}
 	}
 
-	int endStyled = _pEditView->execute(SCI_GETENDSTYLED, 0, 0);
-	int lineEndStyled = _pEditView->execute(SCI_LINEFROMPOSITION, endStyled, 0);
+	DOCPOSITION endStyled = _pEditView->execute(SCI_GETENDSTYLED, 0, 0);
+	LINENUMBER lineEndStyled = _pEditView->execute(SCI_LINEFROMPOSITION, endStyled, 0);
 	endStyled = _pEditView->execute(SCI_POSITIONFROMLINE, lineEndStyled, 0);
 
-	int startPos = 0;
-	int endPos = endStyled;
+	DOCPOSITION startPos = 0;
+	DOCPOSITION endPos = endStyled;
 
 	_pEditView->execute(SCI_SETSEARCHFLAGS, SCFIND_REGEXP|SCFIND_POSIX);
 
@@ -3130,19 +3131,20 @@ void Notepad_plus::addHotSpot(bool docIsModifing)
 	_pEditView->execute(SCI_SETTARGETEND, endPos);
 
 	std::vector<std::pair<int, int> > hotspotStylers;
-
-	int bitsNeeded = _pEditView->execute(SCI_GETSTYLEBITSNEEDED);
+	assert(_pEditView->execute(SCI_GETSTYLEBITSNEEDED) == static_cast<int>(_pEditView->execute(SCI_GETSTYLEBITSNEEDED)));
+	int bitsNeeded = static_cast<int>(_pEditView->execute(SCI_GETSTYLEBITSNEEDED));
 	int styleMask = (1<<bitsNeeded)-1;
 	
 	int style_hotspot = styleMask-1;
-	int posFound = _pEditView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), (LPARAM)urlHttpRegExpr);
+	DOCPOSITION posFound = _pEditView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), reinterpret_cast<LPARAM>(urlHttpRegExpr));
 
 	while (posFound != -1)
 	{
-		int start = int(_pEditView->execute(SCI_GETTARGETSTART));
-		int end = int(_pEditView->execute(SCI_GETTARGETEND));
-		int foundTextLen = end - start;
-		int idStyle = _pEditView->execute(SCI_GETSTYLEAT, posFound);
+		DOCPOSITION start = _pEditView->execute(SCI_GETTARGETSTART);
+		DOCPOSITION end = _pEditView->execute(SCI_GETTARGETEND);
+		DOCPOSITION foundTextLen = end - start;
+		assert(_pEditView->execute(SCI_GETSTYLEAT, posFound) == static_cast<int>(_pEditView->execute(SCI_GETSTYLEAT, posFound)));
+		int idStyle = static_cast<int>(_pEditView->execute(SCI_GETSTYLEAT, posFound));
 
 		if (end < posBegin2style - 1)
 		{
@@ -3198,7 +3200,7 @@ void Notepad_plus::addHotSpot(bool docIsModifing)
 		_pEditView->execute(SCI_SETTARGETSTART, posFound + foundTextLen);
 		_pEditView->execute(SCI_SETTARGETEND, endPos);
 		
-		posFound = _pEditView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), (LPARAM)urlHttpRegExpr);
+		posFound = _pEditView->execute(SCI_SEARCHINTARGET, strlen(urlHttpRegExpr), reinterpret_cast<LPARAM>(urlHttpRegExpr));
 	}
 
 	_pEditView->execute(SCI_STARTSTYLING, endStyle, 0xFF);
@@ -3320,11 +3322,12 @@ void Notepad_plus::specialCmd(int id, int param)
 			POINT p;
 			::GetCursorPos(&p);
 			::ScreenToClient(_hParent, &p);
-			int size = nbColumnEdgeDlg.doDialog(p, _isRTL);
+			INT_PTR size = nbColumnEdgeDlg.doDialog(p, _isRTL);
 
 			if (size != -1)
 			{
-				svp._edgeNbColumn = size;
+				assert(size == static_cast<int>(size));
+				svp._edgeNbColumn = static_cast<int>(size);
 				pEditView->execute(SCI_SETEDGECOLUMN, size);
 			}
 			break;
@@ -4192,8 +4195,8 @@ void Notepad_plus::command(int id)
 
 			if (_syncInfo._isSynScollV)
 			{
-				int mainCurrentLine = _mainEditView->execute(SCI_GETFIRSTVISIBLELINE);
-				int subCurrentLine = _subEditView->execute(SCI_GETFIRSTVISIBLELINE);
+				LINENUMBER mainCurrentLine = _mainEditView->execute(SCI_GETFIRSTVISIBLELINE);
+				LINENUMBER subCurrentLine = _subEditView->execute(SCI_GETFIRSTVISIBLELINE);
 				_syncInfo._line = mainCurrentLine - subCurrentLine;
 			}
 			
@@ -4209,12 +4212,17 @@ void Notepad_plus::command(int id)
 
 			if (_syncInfo._isSynScollH)
 			{
-				int mxoffset = _mainEditView->execute(SCI_GETXOFFSET);
-				int pixel = int(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+				assert(_mainEditView->execute(SCI_GETXOFFSET) == static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET)));
+				assert(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P") == static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P")));
+				assert(_subEditView->execute(SCI_GETXOFFSET) == static_cast<int>(_subEditView->execute(SCI_GETXOFFSET)));
+				assert(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P") == static_cast<int>(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P")));
+
+				int mxoffset = static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET));
+				int pixel = static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 				int mainColumn = mxoffset/pixel;
 
-				int sxoffset = _subEditView->execute(SCI_GETXOFFSET);
-				pixel = int(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+				int sxoffset = static_cast<int>(_subEditView->execute(SCI_GETXOFFSET));
+				pixel = static_cast<int>(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 				int subColumn = sxoffset/pixel;
 				_syncInfo._column = mainColumn - subColumn;
 			}
@@ -4376,7 +4384,7 @@ void Notepad_plus::command(int id)
 				// Save the current clipboard content
 				::OpenClipboard(_hSelf);
 				HANDLE clipboardData = ::GetClipboardData(CF_TEXT);
-				int len = ::GlobalSize(clipboardData);
+				DOCPOSITION len = ::GlobalSize(clipboardData);
 				LPVOID clipboardDataPtr = ::GlobalLock(clipboardData);
 
 				HANDLE allocClipboardData = ::GlobalAlloc(GMEM_MOVEABLE, len);
@@ -4432,10 +4440,11 @@ void Notepad_plus::command(int id)
 			POINT p;
 			::GetCursorPos(&p);
 			::ScreenToClient(_hParent, &p);
-			int size = tabSizeDlg.doDialog(p, _isRTL);
+			INT_PTR size = tabSizeDlg.doDialog(p, _isRTL);
 			if (size != -1)
 			{
-				nppgui._tabSize = size;
+				assert(size == static_cast<int>(size));
+				nppgui._tabSize = static_cast<int>(size);
 				_pEditView->execute(SCI_SETTABWIDTH, nppgui._tabSize);
 			}
 
@@ -4450,11 +4459,11 @@ void Notepad_plus::command(int id)
 
 			ValueDlg valDlg;
 			NppGUI & nppGUI = (NppGUI &)((NppParameters::getInstance())->getNppGUI());
-			valDlg.init(_hInst, _preferenceDlg->getHSelf(), nppGUI._autocFromLen, TEXT("Nb char : "));
+			valDlg.init(_hInst, _preferenceDlg->getHSelf(), static_cast<int>(nppGUI._autocFromLen), TEXT("Nb char : "));
 			POINT p;
 			::GetCursorPos(&p);
 			::ScreenToClient(_hParent, &p);
-			int size = valDlg.doDialog(p, _isRTL);
+			INT_PTR size = valDlg.doDialog(p, _isRTL);
 
 			if (size != -1)
 			{
@@ -4477,14 +4486,15 @@ void Notepad_plus::command(int id)
 			POINT p;
 			::GetCursorPos(&p);
 			::ScreenToClient(_hParent, &p);
-			int size = nbHistoryDlg.doDialog(p, _isRTL);
+			INT_PTR size = nbHistoryDlg.doDialog(p, _isRTL);
 
 			if (size != -1)
 			{
+				assert(size == static_cast<int>(size));
 				if (size > NB_MAX_LRF_FILE)
 					size = NB_MAX_LRF_FILE;
-				pNppParam->setNbMaxFile(size);
-				_lastRecentFileList->setUserMaxNbLRF(size);
+				pNppParam->setNbMaxFile(static_cast<int>(size));
+				_lastRecentFileList->setUserMaxNbLRF(static_cast<int>(size));
 			}
 			break;
 		}
@@ -7055,26 +7065,26 @@ bool Notepad_plus::doBlockComment(comment_mode currCommentMode)
     
 	const int linebufferSize = 1000;
     TCHAR linebuf[linebufferSize];
-    size_t comment_length = comment.length();
-    size_t selectionStart = _pEditView->execute(SCI_GETSELECTIONSTART);
-    size_t selectionEnd = _pEditView->execute(SCI_GETSELECTIONEND);
-    size_t caretPosition = _pEditView->execute(SCI_GETCURRENTPOS);
+    DOCPOSITION comment_length = comment.length();
+    DOCPOSITION selectionStart = _pEditView->execute(SCI_GETSELECTIONSTART);
+    DOCPOSITION selectionEnd = _pEditView->execute(SCI_GETSELECTIONEND);
+    DOCPOSITION caretPosition = _pEditView->execute(SCI_GETCURRENTPOS);
     // checking if caret is located in _beginning_ of selected block
     bool move_caret = caretPosition < selectionEnd;
-    int selStartLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionStart);
-    int selEndLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionEnd);
-    int lines = selEndLine - selStartLine;
-    size_t firstSelLineStart = _pEditView->execute(SCI_POSITIONFROMLINE, selStartLine);
+    LINENUMBER selStartLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionStart);
+    LINENUMBER selEndLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionEnd);
+    LINENUMBER lines = selEndLine - selStartLine;
+    LINENUMBER firstSelLineStart = _pEditView->execute(SCI_POSITIONFROMLINE, selStartLine);
     // "caret return" is part of the last selected line
-    if ((lines > 0) && (selectionEnd == static_cast<size_t>(_pEditView->execute(SCI_POSITIONFROMLINE, selEndLine))))
+    if ((lines > 0) && (selectionEnd == _pEditView->execute(SCI_POSITIONFROMLINE, selEndLine)))
 		selEndLine--;
     _pEditView->execute(SCI_BEGINUNDOACTION);
 
-    for (int i = selStartLine; i <= selEndLine; i++) 
-	{
-		int lineStart = _pEditView->execute(SCI_POSITIONFROMLINE, i);
-        int lineIndent = lineStart;
-        int lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, i);
+    for (LINENUMBER i = selStartLine; i <= selEndLine; i++) 
+    {
+		LINENUMBER lineStart = _pEditView->execute(SCI_POSITIONFROMLINE, i);
+        LINENUMBER lineIndent = lineStart;
+        LINENUMBER lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, i);
         if ((lineEnd - lineIndent) >= linebufferSize)        // Avoid buffer size problems
                 continue;
 
@@ -7090,7 +7100,7 @@ bool Notepad_plus::doBlockComment(comment_mode currCommentMode)
 		{
             if (linebufStr.substr(0, comment_length - 1) == comment.substr(0, comment_length - 1))
 				{
-                int len = (linebufStr.substr(0, comment_length) == comment)?comment_length:comment_length - 1;
+                DOCPOSITION len = (linebufStr.substr(0, comment_length) == comment)?comment_length:comment_length - 1;
 					
                 _pEditView->execute(SCI_SETSEL, lineIndent, lineIndent + len);
 					_pEditView->replaceSelWith("");
@@ -7171,32 +7181,32 @@ bool Notepad_plus::doStreamComment()
 	start_comment += white_space;
 	white_space += end_comment;
 	end_comment = white_space;
-	size_t start_comment_length = start_comment.length();
-	size_t selectionStart = _pEditView->execute(SCI_GETSELECTIONSTART);
-	size_t selectionEnd = _pEditView->execute(SCI_GETSELECTIONEND);
-	size_t caretPosition = _pEditView->execute(SCI_GETCURRENTPOS);
+	DOCPOSITION start_comment_length = start_comment.length();
+	DOCPOSITION selectionStart = _pEditView->execute(SCI_GETSELECTIONSTART);
+	DOCPOSITION selectionEnd = _pEditView->execute(SCI_GETSELECTIONEND);
+	DOCPOSITION caretPosition = _pEditView->execute(SCI_GETCURRENTPOS);
 	// checking if caret is located in _beginning_ of selected block
 	bool move_caret = caretPosition < selectionEnd;
 	// if there is no selection?
 	if (selectionEnd - selectionStart <= 0)
 	{
-		int selLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionStart);
-		int lineIndent = _pEditView->execute(SCI_GETLINEINDENTPOSITION, selLine);
-		int lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, selLine);
+		LINENUMBER selLine = _pEditView->execute(SCI_LINEFROMPOSITION, selectionStart);
+		LINENUMBER lineIndent = _pEditView->execute(SCI_GETLINEINDENTPOSITION, selLine);
+		LINENUMBER lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, selLine);
 
 		TCHAR linebuf[1000];
 		_pEditView->getGenericText(linebuf, lineIndent, lineEnd);
 	    
-		int caret = _pEditView->execute(SCI_GETCURRENTPOS);
-		int line = _pEditView->execute(SCI_LINEFROMPOSITION, caret);
-		int lineStart = _pEditView->execute(SCI_POSITIONFROMLINE, line);
-		int current = caret - lineStart;
+		DOCPOSITION caret = _pEditView->execute(SCI_GETCURRENTPOS);
+		LINENUMBER line = _pEditView->execute(SCI_LINEFROMPOSITION, caret);
+		LINENUMBER lineStart = _pEditView->execute(SCI_POSITIONFROMLINE, line);
+		LINENUMBER current = caret - lineStart;
 		// checking if we are not inside a word
 
-		int startword = current;
-		int endword = current;
-		int start_counter = 0;
-		int end_counter = 0;
+		DOCPOSITION startword = current;
+		DOCPOSITION endword = current;
+		DOCPOSITION start_counter = 0;
+		DOCPOSITION end_counter = 0;
 		while (startword > 0)// && wordCharacters.contains(linebuf[startword - 1]))
 		{
 			start_counter++;
@@ -7262,8 +7272,8 @@ HACCEL Notepad_plus::getAccTable() const
 bool Notepad_plus::addCurrentMacro()
 {
 	std::vector<MacroShortcut> & theMacros = (NppParameters::getInstance())->getMacroList();
-	
-	int nbMacro = theMacros.size();
+	assert(theMacros.size() == static_cast<int>(theMacros.size()));
+	int nbMacro = static_cast<int>(theMacros.size());
 
 	int cmdID = ID_MACRO + nbMacro;
 	MacroShortcut ms(Shortcut(), _macro, cmdID);
@@ -7390,22 +7400,22 @@ ToolBarButtonUnit toolBarIcons[] = {
 
 void Notepad_plus::getTaskListInfo(TaskListInfo *tli)
 {
-	size_t currentNbDoc = _pDocTab->nbItem();
-	size_t nonCurrentNbDoc = _pNonDocTab->nbItem();
+	int currentNbDoc = _pDocTab->nbItem();
+	int nonCurrentNbDoc = _pNonDocTab->nbItem();
 	
 	tli->_currentIndex = 0;
 
 	if (!viewVisible(otherView()))
 		nonCurrentNbDoc = 0;
 
-	for (size_t i = 0 ; i < currentNbDoc ; i++)
+	for (int i = 0 ; i < currentNbDoc ; i++)
 	{
 		BufferID bufID = _pDocTab->getBufferByIndex(i);
 		Buffer * b = MainFileManager->getBufferByID(bufID);
 		int status = b->isReadOnly()?tb_ro:(b->isDirty()?tb_unsaved:tb_saved);
 		tli->_tlfsLst.push_back(TaskLstFnStatus(currentView(), i, b->getFullPathName(), status));
 	}
-	for (size_t i = 0 ; i < nonCurrentNbDoc ; i++)
+	for (int i = 0 ; i < nonCurrentNbDoc ; i++)
 	{
 		BufferID bufID = _pNonDocTab->getBufferByIndex(i);
 		Buffer * b = MainFileManager->getBufferByID(bufID);
@@ -7621,8 +7631,9 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 
 			_mainEditView->performGlobalStyles();
 			_subEditView->performGlobalStyles();
-
-			_zoomOriginalValue = _pEditView->execute(SCI_GETZOOM);
+			
+			assert(_pEditView->execute(SCI_GETZOOM) == static_cast<int>(_pEditView->execute(SCI_GETZOOM)));
+			_zoomOriginalValue = static_cast<int>(_pEditView->execute(SCI_GETZOOM));
 			_mainEditView->execute(SCI_SETZOOM, svp1._zoom);
 			_subEditView->execute(SCI_SETZOOM, svp2._zoom);
 
@@ -7698,11 +7709,12 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			// Macro Menu
 			std::vector<MacroShortcut> & macros  = pNppParam->getMacroList();
 			HMENU hMacroMenu = ::GetSubMenu(_mainMenuHandle, MENUINDEX_MACRO);
-			size_t const posBase = 6;
-			size_t nbMacro = macros.size();
+			int const posBase = 6;
+			assert(macros.size() == static_cast<int>(macros.size()));
+			int nbMacro = static_cast<int>(macros.size());
 			if (nbMacro >= 1)
 				::InsertMenu(hMacroMenu, posBase - 1, MF_BYPOSITION, (unsigned int)-1, 0);
-			for (size_t i = 0 ; i < nbMacro ; i++)
+			for (int i = 0 ; i < nbMacro ; i++)
 			{
 				::InsertMenu(hMacroMenu, posBase + i, MF_BYPOSITION, ID_MACRO + i, macros[i].toMenuItemString().c_str());
 			}
@@ -7710,10 +7722,11 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			std::vector<UserCommand> & userCommands = pNppParam->getUserCommandList();
 			HMENU hRunMenu = ::GetSubMenu(_mainMenuHandle, MENUINDEX_RUN);
 			int const runPosBase = 2;
-			size_t nbUserCommand = userCommands.size();
+			assert(userCommands.size() == static_cast<int>(userCommands.size()));
+			int nbUserCommand = static_cast<int>(userCommands.size());
 			if (nbUserCommand >= 1)
 				::InsertMenu(hRunMenu, runPosBase - 1, MF_BYPOSITION, (unsigned int)-1, 0);
-			for (size_t i = 0 ; i < nbUserCommand ; i++)
+			for (int i = 0 ; i < nbUserCommand ; i++)
 			{
 				::InsertMenu(hRunMenu, runPosBase + i, MF_BYPOSITION, ID_USER_CMD + i, userCommands[i].toMenuItemString().c_str());
 			}
@@ -8345,7 +8358,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			{
 				if ((lParam == 1) || (lParam == 2))
 				{
-					specialCmd(LOWORD(wParam), lParam);
+					specialCmd(LOWORD(wParam), static_cast<int>(lParam));
 				}
 				else
 					command(LOWORD(wParam));
@@ -8376,14 +8389,16 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 
 		case NPPM_GETSHORTCUTBYCMDID:
 		{
-			int cmdID = wParam; // cmdID
-			ShortcutKey *sk = (ShortcutKey *)lParam; // ShortcutKey structure
+			assert(wParam == static_cast<int>(wParam));
+			int cmdID = static_cast<int>(wParam); // cmdID
+			ShortcutKey *sk = reinterpret_cast<ShortcutKey *>(lParam); // ShortcutKey structure
 
 			return _pluginsManager->getShortcutByCmdID(cmdID, sk);
 		}
 
 		case NPPM_MENUCOMMAND :
-			command(lParam);
+			assert(lParam == static_cast<int>(lParam));
+			command(static_cast<int>(lParam));
 			return TRUE;
 
 		case NPPM_GETFULLCURRENTPATH :
@@ -8440,7 +8455,8 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 				}
 				else //buffer large enough, perform safe copy
 				{
-					lstrcpyn((TCHAR *)lParam, str, wParam);
+					assert(wParam == static_cast<int>(wParam));
+					lstrcpyn((TCHAR *)lParam, str, static_cast<int>(wParam));
 					return TRUE;
 				}
 			}
@@ -8532,7 +8548,8 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			if (!wParam) return 0;
 
 			TCHAR **fileNames = (TCHAR **)wParam;
-			int nbFileNames = lParam;
+			assert(lParam == static_cast<int>(lParam));
+			int nbFileNames = static_cast<int>(lParam);
 
 			int j = 0;
 			if (Message != NPPM_GETOPENFILENAMESSECOND) {
@@ -8673,9 +8690,9 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 			
 
 			// get text of current scintilla
-			UINT length = pSci->execute(SCI_GETTEXTLENGTH, 0, 0) + 1;
+			DOCPOSITION length = pSci->execute(SCI_GETTEXTLENGTH, 0, 0) + 1;
 			char* buffer = new char[length];
-			pSci->execute(SCI_GETTEXT, length, (LPARAM)buffer);
+			pSci->execute(SCI_GETTEXT, length, reinterpret_cast<LPARAM>(buffer));
 
 			// convert here      
 			UniMode unicodeMode = pSci->getCurrentBuffer()->getUnicodeMode();
@@ -8712,7 +8729,7 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 				return -1;
 
 			// get text of current scintilla
-			UINT length = pSci->execute(SCI_GETTEXTLENGTH, 0, 0) + 1;
+			DOCPOSITION length = pSci->execute(SCI_GETTEXTLENGTH, 0, 0) + 1;
 			char* buffer = new char[length];
 			pSci->execute(SCI_GETTEXT, length, (LPARAM)buffer);
 
@@ -8743,8 +8760,8 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 		case NPPM_TRIGGERTABBARCONTEXTMENU:
 		{
 			// similar to NPPM_ACTIVEDOC
-			int whichView = ((wParam != MAIN_VIEW) && (wParam != SUB_VIEW))?currentView():wParam;
-			int index = lParam;
+			int whichView = static_cast<int>(((wParam != MAIN_VIEW) && (wParam != SUB_VIEW))?currentView():wParam);
+			int index = static_cast<int>(lParam);
 
 			switchEditViewTo(whichView);
 			activateDoc(index);
@@ -8925,7 +8942,8 @@ LRESULT Notepad_plus::runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lPa
 				case STATUSBAR_UNICODE_TYPE :
 				case STATUSBAR_TYPING_MODE :
 					assert(_statusBar);
-					_statusBar->setText(str2set, wParam);
+					assert(wParam == static_cast<int>(wParam));
+					_statusBar->setText(str2set, static_cast<int>(wParam));
 					return TRUE;
 				default :
 					return FALSE;
@@ -9918,11 +9936,11 @@ void Notepad_plus::postItToggle()
 void Notepad_plus::doSynScorll(HWND whichView)
 {
 	int column = 0;
-	int line = 0;
+	LINENUMBER line = 0;
 	ScintillaEditView *pView;
 
 	// var for Line
-	int mainCurrentLine, subCurrentLine;
+	LINENUMBER mainCurrentLine, subCurrentLine;
 
 	// var for Column
 	int mxoffset, sxoffset;
@@ -9940,13 +9958,17 @@ void Notepad_plus::doSynScorll(HWND whichView)
 		}
 		if (_syncInfo._isSynScollH)
 		{
+
 			// Compute for Column
-			mxoffset = _mainEditView->execute(SCI_GETXOFFSET);
-			pixel = int(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+			assert(_mainEditView->execute(SCI_GETXOFFSET)== static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET)));
+			assert(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P") == static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P")));
+			mxoffset = static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET));
+			pixel = static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 			mainColumn = mxoffset/pixel;
 
-			sxoffset = _subEditView->execute(SCI_GETXOFFSET);
-			pixel = int(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+			assert(_subEditView->execute(SCI_GETXOFFSET) == static_cast<int>(_subEditView->execute(SCI_GETXOFFSET)));
+			sxoffset = static_cast<int>(_subEditView->execute(SCI_GETXOFFSET));
+			pixel = static_cast<int>(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 			subColumn = sxoffset/pixel;
 			column = mainColumn - _syncInfo._column - subColumn;
 		}
@@ -9964,12 +9986,16 @@ void Notepad_plus::doSynScorll(HWND whichView)
 		if (_syncInfo._isSynScollH)
 		{
 			// Compute for Column
-			mxoffset = _mainEditView->execute(SCI_GETXOFFSET);
-			pixel = int(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+			assert(_mainEditView->execute(SCI_GETXOFFSET) == static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET)));
+			assert(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P") == static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P")));
+			mxoffset = static_cast<int>(_mainEditView->execute(SCI_GETXOFFSET));
+			pixel = static_cast<int>(_mainEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 			mainColumn = mxoffset/pixel;
 
-			sxoffset = _subEditView->execute(SCI_GETXOFFSET);
-			pixel = int(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
+			assert(_subEditView->execute(SCI_GETXOFFSET) == static_cast<int>(_subEditView->execute(SCI_GETXOFFSET)));
+			assert(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P") == static_cast<int>(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P")));	
+			sxoffset = static_cast<int>(_subEditView->execute(SCI_GETXOFFSET));
+			pixel = static_cast<int>(_subEditView->execute(SCI_TEXTWIDTH, STYLE_DEFAULT, (LPARAM)"P"));
 			subColumn = sxoffset/pixel;
 			column = subColumn + _syncInfo._column - mainColumn;
 		}
@@ -10037,8 +10063,8 @@ void Notepad_plus::getCurrentOpenedFiles(Session & session)
 
 			//_mainEditView->activateBuffer(buf->getID());
 			_invisibleEditView->execute(SCI_SETDOCPOINTER, 0, buf->getDocument());
-			int maxLine = _invisibleEditView->execute(SCI_GETLINECOUNT);
-			for (int j = 0 ; j < maxLine ; j++)
+			LINENUMBER maxLine = _invisibleEditView->execute(SCI_GETLINECOUNT);
+			for (LINENUMBER j = 0 ; j < maxLine ; j++)
 			{
 				if ((_invisibleEditView->execute(SCI_MARKERGET, j)&(1 << MARK_BOOKMARK)) != 0)
 				{
@@ -10061,8 +10087,8 @@ void Notepad_plus::getCurrentOpenedFiles(Session & session)
 			sessionFileInfo sfi(buf->getFullPathName(), langName, buf->getPosition(_subEditView));
 
 			_invisibleEditView->execute(SCI_SETDOCPOINTER, 0, buf->getDocument());
-			int maxLine = _invisibleEditView->execute(SCI_GETLINECOUNT);
-			for (int j = 0 ; j < maxLine ; j++)
+			LINENUMBER maxLine = _invisibleEditView->execute(SCI_GETLINECOUNT);
+			for (LINENUMBER j = 0 ; j < maxLine ; j++)
 			{
 				if ((_invisibleEditView->execute(SCI_MARKERGET, j)&(1 << MARK_BOOKMARK)) != 0)
 				{
@@ -10316,7 +10342,7 @@ void Notepad_plus::notifyBufferChanged(Buffer * buffer, int mask)
 
 		if (didDialog)
 		{
-			int curPos = _pEditView->execute(SCI_GETCURRENTPOS);
+			DOCPOSITION curPos = _pEditView->execute(SCI_GETCURRENTPOS);
 			::PostMessage(_pEditView->getHSelf(), WM_LBUTTONUP, 0, 0);
 			::PostMessage(_pEditView->getHSelf(), SCI_SETSEL, curPos, curPos);
 			if (::IsIconic(_hSelf))
@@ -10482,7 +10508,7 @@ void Notepad_plus::loadCommandlineParams(const TCHAR * commandLine, CmdLineParam
 			_pEditView->execute(SCI_GOTOLINE, ln-1);
             else
             {
-                int pos = _pEditView->execute(SCI_FINDCOLUMN, ln-1, cn-1);
+                DOCPOSITION pos = _pEditView->execute(SCI_FINDCOLUMN, ln-1, cn-1);
                 _pEditView->execute(SCI_GOTOPOS, pos);
             }
 			switchEditViewTo(iView);	//restore view
@@ -10799,8 +10825,8 @@ void Notepad_plus::pasteToMarkedLines()
 
 void Notepad_plus::deleteMarkedline(int ln)
 {
-	int lineLen = _pEditView->execute(SCI_LINELENGTH, ln);
-	int lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
+	DOCPOSITION lineLen = _pEditView->execute(SCI_LINELENGTH, ln);
+	DOCPOSITION lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
 
 	bookmarkDelete(ln);
 	TCHAR emptyString[2] = TEXT("");
@@ -10809,16 +10835,16 @@ void Notepad_plus::deleteMarkedline(int ln)
 
 void Notepad_plus::replaceMarkedline(int ln, const TCHAR *str)
 {
-	int lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
-	int lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, ln);
+	DOCPOSITION lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
+	DOCPOSITION lineEnd = _pEditView->execute(SCI_GETLINEENDPOSITION, ln);
 
 	_pEditView->replaceTarget(str, lineBegin, lineEnd);
 }
 
 generic_string Notepad_plus::getMarkedLine(int ln)
 {
-	int lineLen = _pEditView->execute(SCI_LINELENGTH, ln);
-	int lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
+	DOCPOSITION lineLen = _pEditView->execute(SCI_LINELENGTH, ln);
+	DOCPOSITION lineBegin = _pEditView->execute(SCI_POSITIONFROMLINE, ln);
 
 	TCHAR * buf = new TCHAR[lineLen+1];
 	_pEditView->getGenericText(buf, lineBegin, lineBegin + lineLen);

@@ -668,7 +668,7 @@ void Accelerator::reNew()
 	_hAccTable = ::CreateAcceleratorTable(_pAccelArray, _nbAccelItems);
 }
 
-recordedMacroStep::recordedMacroStep(int iMessage, long wParam, long lParam)
+recordedMacroStep::recordedMacroStep(int iMessage, WPARAM wParam, LPARAM lParam)
 	: message(iMessage), wParameter(wParam), lParameter(lParam), MacroType(mtUseLParameter)
 { 
 	if (lParameter) {
