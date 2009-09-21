@@ -745,6 +745,10 @@
 			Name="Tests"
 			>
 			<File
+				RelativePath="..\tests\testParameters.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\tests\testPathAppend.cpp"
 				>
 			</File>

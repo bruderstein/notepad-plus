@@ -2030,7 +2030,7 @@ void FindReplaceDlg::enableFindInFilesControls(bool isEnable)
 
 void FindReplaceDlg::getPatterns(std::vector<generic_string> & patternVect)
 {
-	cutString(_filters.c_str(), patternVect);
+	cutString(_filters, patternVect);
 }
 
 void FindReplaceDlg::combo2ExtendedMode(int comboID)

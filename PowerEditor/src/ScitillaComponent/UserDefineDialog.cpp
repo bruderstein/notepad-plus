@@ -32,36 +32,6 @@
 UserLangContainer * SharedParametersDialog::_pUserLang = NULL;
 ScintillaEditView * SharedParametersDialog::_pScintilla = NULL;
 
-enum UDD_KeywordList
-{
-	KWL_FOLDER_OPEN_INDEX = 1,
-	KWL_FOLDER_CLOSE_INDEX = 2,
-	KWL_OPERATOR_INDEX = 3,
-	KWL_COMMENT_INDEX = 4,
-	KWL_KW1_INDEX = 5,
-	KWL_KW2_INDEX = 6,
-	KWL_KW3_INDEX = 7,
-	KWL_KW4_INDEX = 8,
-	KWL_DELIM_INDEX = 0
-};
-
-enum UDD_Style
-{
-	STYLE_DEFAULT_INDEX = 0,
-	STYLE_BLOCK_OPEN_INDEX = 1,
-	STYLE_BLOCK_CLOSE_INDEX = 2,
-	STYLE_WORD1_INDEX = 3,
-	STYLE_WORD2_INDEX = 4,
-	STYLE_WORD3_INDEX = 5,
-	STYLE_WORD4_INDEX = 6,
-	STYLE_COMMENT_INDEX = 7,
-	STYLE_COMMENTLINE_INDEX = 8,
-	STYLE_NUMBER_INDEX = 9,
-	STYLE_OPERATOR_INDEX = 10,
-	STYLE_DELIM2_INDEX = 11,
-	STYLE_DELIM3_INDEX = 12
-};
-
 class StringDlg : public StaticDialog
 {
 public :
@@ -195,13 +165,13 @@ void SharedParametersDialog::initControls()
     }
 }
 
-bool SharedParametersDialog::setPropertyByCheck(HWND hwnd, WPARAM id, bool & bool2set) 
+bool SharedParametersDialog::getPropertyByCheck(HWND hwnd, WPARAM id) 
 {
-	bool2set = (BST_CHECKED == ::SendMessage(::GetDlgItem(hwnd, id), BM_GETCHECK, 0, 0));
+	bool bool2set = (BST_CHECKED == ::SendMessage(::GetDlgItem(hwnd, id), BM_GETCHECK, 0, 0));
 
 	if (_pScintilla->getCurrentBuffer()->getLangType() == L_USER)
 		_pScintilla->styleChange();
-	return TRUE;
+	return bool2set;
 }
 
 void SharedParametersDialog::styleUpdate(const Style & style, ColourPicker *pFgColourPicker, ColourPicker *pBgColourPicker, 
@@ -268,7 +238,11 @@ void FolderStyleDialog::setKeywords2List(int ctrlID)
         index = -1;
         
     if (index != -1)
-		::GetDlgItemText(_hSelf, ctrlID, _pUserLang->_keywordLists[index], max_char);
+    {
+		TCHAR buf[max_char];
+		::GetDlgItemText(_hSelf, ctrlID, buf, max_char);
+		_pUserLang->setKeywordList(index, buf);
+	}
 }
 
 BOOL CALLBACK SharedParametersDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARAM lParam)
@@ -400,8 +374,8 @@ BOOL CALLBACK SharedParametersDialog::run_dlgProc(UINT Message, WPARAM wParam, L
 
 void FolderStyleDialog::updateDlg() 
 {
-	::SendDlgItemMessage(_hSelf, IDC_FOLDEROPEN_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_FOLDER_OPEN_INDEX]));
-	::SendDlgItemMessage(_hSelf, IDC_FOLDERCLOSE_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_FOLDER_CLOSE_INDEX]));
+	::SendDlgItemMessage(_hSelf, IDC_FOLDEROPEN_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_FOLDER_OPEN_INDEX).c_str()));
+	::SendDlgItemMessage(_hSelf, IDC_FOLDERCLOSE_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_FOLDER_CLOSE_INDEX).c_str()));
 
 	Style & defaultStyle = _pUserLang->_styleArray.getStyler(STYLE_DEFAULT_INDEX);
 	styleUpdate(defaultStyle, _pFgColour[0], _pBgColour[0], IDC_DEFAULT_FONT_COMBO, IDC_DEFAULT_FONTSIZE_COMBO,
@@ -531,29 +505,32 @@ BOOL CALLBACK KeyWordsStyleDialog::run_dlgProc(UINT Message, WPARAM wParam, LPAR
 {
 	switch (Message) 
 	{
-
 		case WM_COMMAND : 
 		{
 			switch (wParam)
 			{
 				case IDC_KEYWORD1_PREFIX_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isPrefix[0]);
+					_pUserLang->setIsPrefix(0, getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				case IDC_KEYWORD2_PREFIX_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isPrefix[1]);
+					_pUserLang->setIsPrefix(1, getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				case IDC_KEYWORD3_PREFIX_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isPrefix[2]);
+					_pUserLang->setIsPrefix(2, getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				case IDC_KEYWORD4_PREFIX_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isPrefix[3]);
+					_pUserLang->setIsPrefix(3, getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				NO_DEFAULT_CASE;
 			}
 		}
 		break;
 		
-		default :
+		default:
 		break;
 	}
 	return SharedParametersDialog::run_dlgProc(Message, wParam, lParam);
@@ -571,7 +548,11 @@ void KeyWordsStyleDialog::setKeywords2List(int id)
 		default : index = -1;
 	}
     if (index != -1)
-		::GetDlgItemText(_hSelf, id, _pUserLang->_keywordLists[index], max_char);
+    {
+		TCHAR buf[max_char];
+		::GetDlgItemText(_hSelf, id, buf, max_char);
+		_pUserLang->setKeywordList(index, buf);
+	}
 }
 
 int KeyWordsStyleDialog::getStylerIndexFromCP(HWND hWnd, bool & isFG, ColourPicker **ppCP) const
@@ -653,10 +634,10 @@ int KeyWordsStyleDialog::getGroupeIndexFromCheck(int ctrlID, int & fontStyleMask
 
 void KeyWordsStyleDialog::updateDlg() 
 {
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD1_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_KW1_INDEX]));
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD2_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_KW2_INDEX]));
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD3_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_KW3_INDEX]));
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD4_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->_keywordLists[KWL_KW4_INDEX]));
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD1_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_KW1_INDEX).c_str()));
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD2_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_KW2_INDEX).c_str()));
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD3_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_KW3_INDEX).c_str()));
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD4_EDIT, WM_SETTEXT, 0, (LPARAM)(_pUserLang->getKeywordList(KWL_KW4_INDEX).c_str()));
 
 	Style & w1Style = _pUserLang->_styleArray.getStyler(STYLE_WORD1_INDEX);
 	styleUpdate(w1Style, _pFgColour[0], _pBgColour[0], IDC_KEYWORD1_FONT_COMBO, IDC_KEYWORD1_FONTSIZE_COMBO,
@@ -674,10 +655,10 @@ void KeyWordsStyleDialog::updateDlg()
 	styleUpdate(w4Style, _pFgColour[3], _pBgColour[3], IDC_KEYWORD4_FONT_COMBO, IDC_KEYWORD4_FONTSIZE_COMBO,
 		 IDC_KEYWORD4_BOLD_CHECK, IDC_KEYWORD4_ITALIC_CHECK, IDC_KEYWORD4_UNDERLINE_CHECK);
 
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD1_PREFIX_CHECK, BM_SETCHECK, _pUserLang->_isPrefix[0], 0);
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD2_PREFIX_CHECK, BM_SETCHECK, _pUserLang->_isPrefix[1], 0);
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD3_PREFIX_CHECK, BM_SETCHECK, _pUserLang->_isPrefix[2], 0);
-	::SendDlgItemMessage(_hSelf, IDC_KEYWORD4_PREFIX_CHECK, BM_SETCHECK, _pUserLang->_isPrefix[3], 0);
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD1_PREFIX_CHECK, BM_SETCHECK, _pUserLang->isPrefix(0), 0);
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD2_PREFIX_CHECK, BM_SETCHECK, _pUserLang->isPrefix(1), 0);
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD3_PREFIX_CHECK, BM_SETCHECK, _pUserLang->isPrefix(2), 0);
+	::SendDlgItemMessage(_hSelf, IDC_KEYWORD4_PREFIX_CHECK, BM_SETCHECK, _pUserLang->isPrefix(3), 0);
 }
 
 int KeyWordsStyleDialog::getGroupIndexFromCombo( int ctrlID, bool & isFontSize ) const
@@ -742,10 +723,12 @@ BOOL CALLBACK CommentStyleDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARA
 			switch (wParam)
 			{
 				case IDC_COMMENTLINESYMBOL_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isCommentLineSymbol);
+					_pUserLang->setIsCommentLineSymbol(getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				case IDC_COMMENTSYMBOL_CHECK :
-					return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isCommentSymbol);
+					_pUserLang->setIsCommentSymbol(getPropertyByCheck(_hSelf, wParam));
+					return TRUE;
 
 				NO_DEFAULT_CASE;
 			}
@@ -783,7 +766,7 @@ void CommentStyleDialog::setKeywords2List(int id)
         convertTo(newList, commentOpen, '1');
         convertTo(newList, commentClose, '2');
         convertTo(newList, commentLine, '0');
-        lstrcpy(_pUserLang->_keywordLists[i], newList);
+        _pUserLang->setKeywordList(i, newList);
     }
 }
 
@@ -874,12 +857,12 @@ void CommentStyleDialog::convertTo(TCHAR *dest, const TCHAR *toConvert, TCHAR pr
     dest[index] = '\0'; 
 }
 
-void CommentStyleDialog::retrieve(TCHAR *dest, const TCHAR *toRetrieve, TCHAR prefix) const 
+void CommentStyleDialog::retrieve(TCHAR *dest, const generic_string& toRetrieve, TCHAR prefix) const 
 {
 	int j = 0;
 	bool begin2Copy = false;
 
-	for (int i = 0 ; i < int(lstrlen(toRetrieve)) ; i++)
+	for (size_t i = 0; i < toRetrieve.length(); i++)
 	{
 		if (((i == 0) || toRetrieve[i-1] == ' ') && (toRetrieve[i] == prefix))
 		{
@@ -903,9 +886,9 @@ void CommentStyleDialog::updateDlg()
 	TCHAR commentClose[256] = TEXT("");
 	TCHAR commentLine[256] = TEXT("");
 
-	retrieve(commentOpen, _pUserLang->_keywordLists[KWL_COMMENT_INDEX], '1');
-	retrieve(commentClose, _pUserLang->_keywordLists[KWL_COMMENT_INDEX], '2');
-	retrieve(commentLine, _pUserLang->_keywordLists[KWL_COMMENT_INDEX], '0');
+	retrieve(commentOpen, _pUserLang->getKeywordList(KWL_COMMENT_INDEX), '1');
+	retrieve(commentClose, _pUserLang->getKeywordList(KWL_COMMENT_INDEX), '2');
+	retrieve(commentLine, _pUserLang->getKeywordList(KWL_COMMENT_INDEX), '0');
 
 	::SendDlgItemMessage(_hSelf, IDC_COMMENTOPEN_EDIT, WM_SETTEXT, 0, (LPARAM)commentOpen);
 	::SendDlgItemMessage(_hSelf, IDC_COMMENTCLOSE_EDIT, WM_SETTEXT, 0, (LPARAM)commentClose);
@@ -923,8 +906,8 @@ void CommentStyleDialog::updateDlg()
 	styleUpdate(numberStyle, _pFgColour[2], _pBgColour[2], IDC_NUMBER_FONT_COMBO, IDC_NUMBER_FONTSIZE_COMBO,
 		 IDC_NUMBER_BOLD_CHECK, IDC_NUMBER_ITALIC_CHECK, IDC_NUMBER_UNDERLINE_CHECK);
 
-	::SendDlgItemMessage(_hSelf, IDC_COMMENTLINESYMBOL_CHECK, BM_SETCHECK, _pUserLang->_isCommentLineSymbol, 0);
-	::SendDlgItemMessage(_hSelf, IDC_COMMENTSYMBOL_CHECK, BM_SETCHECK, _pUserLang->_isCommentSymbol, 0);
+	::SendDlgItemMessage(_hSelf, IDC_COMMENTLINESYMBOL_CHECK, BM_SETCHECK, _pUserLang->isCommentLineSymbol(), 0);
+	::SendDlgItemMessage(_hSelf, IDC_COMMENTSYMBOL_CHECK, BM_SETCHECK, _pUserLang->isCommentSymbol(), 0);
 }
 
 int CommentStyleDialog::getGroupIndexFromCombo( int ctrlID, bool & isFontSize ) const
@@ -1047,10 +1030,10 @@ void SymbolsStyleDialog::symbolAction(bool action)
 	for (int i = 0 ; i < count ; i++)
 	{
 		::SendDlgItemMessage(_hSelf, IDC_ACTIVATED_SYMBOL_LIST, LB_GETTEXT, i, (LPARAM)s);
-		_pUserLang->_keywordLists[3][j++] = s[0];
-		_pUserLang->_keywordLists[3][j++] = ' ';
+		_pUserLang->getKeywordList(KWL_OPERATOR_INDEX)[j++] = s[0];
+		_pUserLang->getKeywordList(KWL_OPERATOR_INDEX)[j++] = ' ';
 	}
-	_pUserLang->_keywordLists[3][--j] = '\0';
+	_pUserLang->getKeywordList(KWL_OPERATOR_INDEX)[--j] = '\0';
 	
 	if (_pScintilla->getCurrentBuffer()->getLangType() == L_USER)
 		_pScintilla->styleChange();
@@ -1073,9 +1056,9 @@ void SymbolsStyleDialog::updateDlg()
 {
 	listboxsReInit();
 
-	const TCHAR *symbols = _pUserLang->_keywordLists[KWL_OPERATOR_INDEX];
+	const generic_string& symbols = _pUserLang->getKeywordList(KWL_OPERATOR_INDEX);
 
-	for (int i = 0 ; i < int(lstrlen(symbols)) ; i++)
+	for (size_t i = 0 ; i < symbols.length(); i++)
 	{
 		if (symbols[i] != ' ')
 		{
@@ -1110,12 +1093,12 @@ void SymbolsStyleDialog::updateDlg()
 		}
 	}
 	
-	const TCHAR *delims = _pUserLang->_keywordLists[KWL_DELIM_INDEX];
-	// ICI LE TRAITEMENT POUR REMPLIR LES 4 COMBO BOX
+	const generic_string& delims = _pUserLang->getKeywordList(KWL_DELIM_INDEX);
+	// Here we fill the 4 combo boxes.
 	TCHAR dOpen1[2], dClose1[2], dOpen2[2], dClose2[2], dOpen3[2], dClose3[2];
 	dOpen1[0] = dClose1[0] = dOpen2[0] = dClose2[0] = dOpen3[0] = dClose3[0] = '\0';
 	dOpen1[1] = dClose1[1] = dOpen2[1] = dClose2[1] = dOpen3[1] = dClose3[1] = '\0';
-	if (lstrlen(delims) >= 6)
+	if (delims.length() >= 6)
 	{
 		if (delims[0] != '0')
 			dOpen1[0] = delims[0];
@@ -1278,7 +1261,7 @@ BOOL CALLBACK SymbolsStyleDialog::run_dlgProc(UINT Message, WPARAM wParam, LPARA
 					else // (LOWORD(wParam) == IDC_SYMBOL_BC3_COMBO)
 						symbIndex = 4;
 
-					TCHAR *delims = _pUserLang->_keywordLists[KWL_DELIM_INDEX];
+					generic_string& delims = _pUserLang->getKeywordList(KWL_DELIM_INDEX);
 					delims[symbIndex] = charStr[0]?charStr[0]:'0';
 
 					if (_pScintilla->getCurrentBuffer()->getLangType() == L_USER)
@@ -1449,7 +1432,7 @@ void UserDefineDialog::enableLangAndControlsBy(int index)
 {
 	_pUserLang = (index == 0)?_pCurrentUserLang:&((NppParameters::getInstance())->getULCFromIndex(index - 1));
 	if (index != 0)
-		::SetWindowText(::GetDlgItem(_hSelf, IDC_EXT_EDIT), _pUserLang->_ext.c_str());
+		::SetWindowText(::GetDlgItem(_hSelf, IDC_EXT_EDIT), _pUserLang->getExtension().c_str());
 
 	::ShowWindow(::GetDlgItem(_hSelf, IDC_EXT_STATIC), (index == 0)?SW_HIDE:SW_SHOW);
 	::ShowWindow(::GetDlgItem(_hSelf, IDC_EXT_EDIT), (index == 0)?SW_HIDE:SW_SHOW);
@@ -1465,7 +1448,7 @@ void UserDefineDialog::updateDlg()
 		if (i > 0)
 			_isDirty = true;
 	}
-	::SendDlgItemMessage(_hSelf, IDC_LANGNAME_IGNORECASE_CHECK, BM_SETCHECK, _pUserLang->_isCaseIgnored, 0);
+	::SendDlgItemMessage(_hSelf, IDC_LANGNAME_IGNORECASE_CHECK, BM_SETCHECK, _pUserLang->isCaseIgnored(), 0);
 	_folderStyleDlg.updateDlg();
 	_keyWordsStyleDlg.updateDlg();
 	_commentStyleDlg.updateDlg();
@@ -1529,7 +1512,7 @@ BOOL CALLBACK UserDefineDialog::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 			for (int i = 0 ; i < pNppParam->getNbUserLang() ; i++)
 			{
 				UserLangContainer & userLangContainer = pNppParam->getULCFromIndex(i);
-				::SendDlgItemMessage(_hSelf, IDC_LANGNAME_COMBO, CB_ADDSTRING, 0, (LPARAM)userLangContainer.getName());
+				::SendDlgItemMessage(_hSelf, IDC_LANGNAME_COMBO, CB_ADDSTRING, 0, (LPARAM)userLangContainer.getName().c_str());
 			}
 			::SendDlgItemMessage(_hSelf, IDC_LANGNAME_COMBO, CB_SETCURSEL, 0, 0);
 			enableLangAndControlsBy(0);
@@ -1594,7 +1577,7 @@ BOOL CALLBACK UserDefineDialog::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
             {
 				TCHAR ext[extsLenMax];
 				::SendDlgItemMessage(_hSelf, IDC_EXT_EDIT, WM_GETTEXT, extsLenMax, (LPARAM)ext);
-				_pUserLang->_ext = ext;
+				_pUserLang->setExtension(ext);
                 return TRUE;
             }
             else if (HIWORD(wParam) == CBN_SELCHANGE)
@@ -1701,7 +1684,7 @@ BOOL CALLBACK UserDefineDialog::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 							
 							//rename current language name in userLangArray
 							UserLangContainer & userLangContainer = pNppParam->getULCFromIndex(i-1);
-							userLangContainer._name = newName;
+							userLangContainer.setName(newName);
 
 							//rename current language name in langMenu
 							HWND hNpp = ::GetParent(_hSelf);
@@ -1776,7 +1759,8 @@ BOOL CALLBACK UserDefineDialog::run_dlgProc(UINT message, WPARAM wParam, LPARAM 
 					}
 
 					case IDC_LANGNAME_IGNORECASE_CHECK :
-						return setPropertyByCheck(_hSelf, wParam, _pUserLang->_isCaseIgnored);
+						_pUserLang->setIsCaseIgnored(getPropertyByCheck(_hSelf, wParam));
+						return TRUE;
 
 				    default :
 					    break;
@@ -1895,5 +1879,5 @@ void UserDefineDialog::doDialog( bool willBeShown /*= true*/, bool isRTL /*= fal
 
 int UserDefineDialog::getNbKeywordList()
 {
-	return nbKeywodList;
+	return KWL_NB_KEYWORD_LISTS;
 }
