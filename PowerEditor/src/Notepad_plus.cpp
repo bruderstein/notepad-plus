@@ -10163,10 +10163,12 @@ bool Notepad_plus::str2Cliboard(const TCHAR *str2cpy)
 
 	int len2Allocate = lstrlen(str2cpy) + 1;
 	len2Allocate *= sizeof(TCHAR);
-	unsigned int cilpboardFormat = CF_TEXT;
+	unsigned int cilpboardFormat;
 
 #ifdef UNICODE
 	cilpboardFormat = CF_UNICODETEXT;
+#else
+	cilpboardFormat = CF_TEXT;
 #endif
 
 	HGLOBAL hglbCopy = ::GlobalAlloc(GMEM_MOVEABLE, len2Allocate);
